@@ -1,0 +1,10 @@
+language: php
+php:
+  - '5.6'
+  - '7.1'
+  - '7.2'
+  - nightly
+before_script:
+  - sudo apt-get update
+  - sudo apt-get install -y pdftk
+  - composer install

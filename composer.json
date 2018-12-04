@@ -1,0 +1,40 @@
+{
+    "name": "gmi/toolkit-pdftk",
+    "description": "PDFtk wrapper",
+    "type": "library",
+    "license": "LGPL-3.0-only",
+    "homepage": "https://github.com/gmitirol/toolkit-pdftk",
+    "support": {
+        "issues": "https://github.com/gmitirol/toolkit-pdftk/issues"
+    },
+    "authors": [
+        {
+            "name": "Martin Pircher",
+            "email": "martin.pircher@i-med.ac.at"
+        },
+        {
+            "name": "Andreas Erhard",
+            "email": "andreas.erhard@i-med.ac.at"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+        "symfony/finder": "~2.7|~3.0|~4.0",
+        "symfony/process": "~2.7|~3.0|~4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.6"
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Gmi\\Toolkit\\Pdftk\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Gmi\\Toolkit\\Pdftk\\": "tests/"
+        }
+    }
+}
+
