@@ -15,6 +15,7 @@ namespace Gmi\Toolkit\Pdftk\Tests;
 use PHPUnit\Framework\TestCase;
 
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use Gmi\Toolkit\Pdftk\Exception\SplitException;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
@@ -30,10 +31,8 @@ class PdfSplitterTest extends TestCase
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
+                    ->method('mustRun')
+                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
@@ -50,23 +49,25 @@ class PdfSplitterTest extends TestCase
         $splitter->split($inputFile, $mapping, $outputFolder);
     }
 
-    public function testSplitExceptionHasErrorMessage()
+    public function testSplitExceptionHasErrorMessageAndOutput()
     {
         $inputFile = __DIR__ . '/test/dummy.pdf';
         $mapping = ['dummy-1.pdf' => [1]];
         $outputFolder = __DIR__ . '/test';
 
         $pdfErrorMessage = 'PDf error message';
+        $pdfOutputMessage = 'PDf output message';
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
+                    ->method('mustRun')
+                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn($pdfErrorMessage);
+        $mockProcess->expects($this->once())
+                    ->method('getOutput')
+                    ->willReturn($pdfOutputMessage);
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
@@ -83,6 +84,7 @@ class PdfSplitterTest extends TestCase
             $splitter->split($inputFile, $mapping, $outputFolder);
         } catch (SplitException $e) {
             $this->assertSame($pdfErrorMessage, $e->getPdfError());
+            $this->assertSame($pdfOutputMessage, $e->getPdfOutput());
         }
     }
 
@@ -94,10 +96,7 @@ class PdfSplitterTest extends TestCase
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->exactly(2))
-                    ->method('run');
-        $mockProcess->expects($this->exactly(2))
-                    ->method('isSuccessful')
-                    ->willReturn(true);
+                    ->method('mustRun');
 
         $commandLine1 = '/my/pdftk \'' . $inputFile . '\' cat 1 3 5 output \'' . $outputFolder . '/dummy-odd.pdf\'';
         $commandLine2 = '/my/pdftk \'' . $inputFile . '\' cat 2 4 6 output \'' . $outputFolder . '/dummy-even.pdf\'';
@@ -130,10 +129,7 @@ class PdfSplitterTest extends TestCase
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->exactly(2))
-                    ->method('run');
-        $mockProcess->expects($this->exactly(2))
-                    ->method('isSuccessful')
-                    ->willReturn(true);
+                    ->method('mustRun');
 
         $commandLine1 = '/my/pdftk \'' . $inputFile . '\' cat 1 2 3 output \'/foo/dummy-a.pdf\'';
         $commandLine2 = '/my/pdftk \'' . $inputFile . '\' cat 4 5 6 output \'/bar/dummy-b.pdf\'';

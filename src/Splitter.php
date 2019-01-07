@@ -12,8 +12,9 @@
 
 namespace Gmi\Toolkit\Pdftk;
 
+use Symfony\Component\Process\Exception\ExceptionInterface;
+
 use Gmi\Toolkit\Pdftk\Exception\SplitException;
-use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 /**
  * Splits PDF files.
@@ -53,14 +54,17 @@ class Splitter
         foreach ($commandLines as $commandLine) {
             $process = $this->wrapper->createProcess($commandLine);
             $process->setTimeout(300);
-            $process->run();
 
-            if (!$process->isSuccessful()) {
+
+            try {
+                $process->mustRun();
+            } catch (ExceptionInterface $e) {
                 throw new SplitException(
                     sprintf('Failed to split PDF "%s"!', $inputFile),
                     0,
                     null,
-                    $process->getErrorOutput()
+                    $process->getErrorOutput(),
+                    $process->getOutput()
                 );
             }
         }

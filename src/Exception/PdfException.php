@@ -26,18 +26,25 @@ class PdfException extends Exception
     private $pdfError;
 
     /**
+     * @var string
+     */
+    private $pdfOutput;
+
+    /**
      * Constructor.
      *
      * @param string    $message
      * @param int       $code
      * @param Exception $previous
      * @param string    $pdfError
+     * @param string    $pdfOutput
      */
-    public function __construct($message, $code = 0, Exception $previous = null, $pdfError = null)
+    public function __construct($message, $code = 0, Exception $previous = null, $pdfError = null, $pdfOutput = null)
     {
         parent::__construct($message, $code, $previous);
 
         $this->pdfError = $pdfError;
+        $this->pdfOutput = $pdfOutput;
     }
 
     /**
@@ -46,5 +53,13 @@ class PdfException extends Exception
     public function getPdfError()
     {
         return $this->pdfError;
+    }
+
+    /**
+     * Returns the concrete output of the underlying PDF library.
+     */
+    public function getPdfOutput()
+    {
+        return $this->pdfOutput;
     }
 }

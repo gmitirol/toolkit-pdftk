@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
@@ -103,11 +104,9 @@ class JoinerTest extends TestCase
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
+                    ->method('mustRun')
+                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
         $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
-        $mockProcess->expects($this->never())
                     ->method('getOutput');
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
@@ -126,7 +125,7 @@ class JoinerTest extends TestCase
         $joiner->joinByPattern($inputFolder, $pattern, $output);
     }
 
-    public function testJoinExceptionHasErrorMessage()
+    public function testJoinExceptionHasErrorMessageAndOutput()
     {
         $inputFolder = __DIR__ . '/DummyFolder';
         $pattern = '/^[a-zA-Z]{2}[0-9]{6}\.pdf$/';
@@ -158,18 +157,18 @@ class JoinerTest extends TestCase
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
         $pdfErrorMessage = 'PDf error message';
+        $pdfOutputMessage = 'PDf output message';
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
+                    ->method('mustRun')
+                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn($pdfErrorMessage);
-        $mockProcess->expects($this->never())
-                    ->method('getOutput');
+        $mockProcess->expects($this->once())
+                    ->method('getOutput')
+                    ->willReturn($pdfOutputMessage);
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
@@ -186,6 +185,7 @@ class JoinerTest extends TestCase
             $joiner->joinByPattern($inputFolder, $pattern, $output);
         } catch (JoinException $e) {
             $this->assertSame($pdfErrorMessage, $e->getPdfError());
+            $this->assertSame($pdfOutputMessage, $e->getPdfOutput());
         }
     }
 
@@ -222,10 +222,7 @@ class JoinerTest extends TestCase
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(true);
+                    ->method('mustRun');
         $mockProcess->expects($this->once())
                     ->method('getOutput');
 
@@ -289,10 +286,7 @@ class JoinerTest extends TestCase
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(true);
+                    ->method('mustRun');
         $mockProcess->expects($this->once())
                     ->method('getOutput');
 
@@ -358,10 +352,7 @@ class JoinerTest extends TestCase
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(true);
+                    ->method('mustRun');
         $mockProcess->expects($this->once())
                     ->method('getOutput');
 

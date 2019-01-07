@@ -15,6 +15,7 @@ namespace Gmi\Toolkit\Pdftk;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ExceptionInterface;
 
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
@@ -117,14 +118,15 @@ class Joiner
         $process = $this->wrapper->createProcess($commandLine);
         $process->setTimeout(300);
 
-        $process->run();
-
-        if (!$process->isSuccessful()) {
+        try {
+            $process->mustRun();
+        } catch (ExceptionInterface $e) {
             throw new JoinException(
                 sprintf('Failed to join PDF "%s"!', $output),
                 0,
                 null,
-                $process->getErrorOutput()
+                $process->getErrorOutput(),
+                $process->getOutput()
             );
         }
 
