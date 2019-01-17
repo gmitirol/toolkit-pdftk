@@ -16,7 +16,6 @@ use PHPUnit\Framework\TestCase;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
@@ -25,6 +24,7 @@ use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Pdftk\Util\FileSorter;
 
 use ArrayObject;
+use Exception;
 use SplFileInfo;
 
 class JoinerTest extends TestCase
@@ -102,10 +102,12 @@ class JoinerTest extends TestCase
                    ->with([$mockSplFileInfo])
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
+        $exception = $this->getTestException();
+
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
                     ->method('mustRun')
-                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
+                    ->will($this->throwException($exception));
         $mockProcess->expects($this->once())
                     ->method('getOutput');
 
@@ -121,7 +123,9 @@ class JoinerTest extends TestCase
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
         $this->expectException(JoinException::class);
-
+        $this->expectExceptionMessage(
+            sprintf('Failed to join PDF "%s"! Error: %s', $output, $exception->getMessage())
+        );
         $joiner->joinByPattern($inputFolder, $pattern, $output);
     }
 
@@ -159,10 +163,12 @@ class JoinerTest extends TestCase
         $pdfErrorMessage = 'PDf error message';
         $pdfOutputMessage = 'PDf output message';
 
+        $exception = $this->getTestException();
+
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
                     ->method('mustRun')
-                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
+                    ->will($this->throwException($exception));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn($pdfErrorMessage);
@@ -184,8 +190,13 @@ class JoinerTest extends TestCase
         try {
             $joiner->joinByPattern($inputFolder, $pattern, $output);
         } catch (JoinException $e) {
+            $this->assertSame(
+                sprintf('Failed to join PDF "%s"! Error: %s', $output, $exception->getMessage()),
+                $e->getMessage()
+            );
             $this->assertSame($pdfErrorMessage, $e->getPdfError());
             $this->assertSame($pdfOutputMessage, $e->getPdfOutput());
+            $this->assertSame($exception, $e->getPrevious());
         }
     }
 
@@ -370,5 +381,10 @@ class JoinerTest extends TestCase
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
         $joiner->joinByPattern($inputFolder, $pattern, $output);
+    }
+
+    private function getTestException()
+    {
+        return new Exception('pdftk exception message');
     }
 }

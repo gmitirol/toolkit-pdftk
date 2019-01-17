@@ -15,11 +15,12 @@ namespace Gmi\Toolkit\Pdftk\Tests;
 use PHPUnit\Framework\TestCase;
 
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use Gmi\Toolkit\Pdftk\Exception\SplitException;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Pdftk\Splitter;
+
+use Exception;
 
 class PdfSplitterTest extends TestCase
 {
@@ -29,10 +30,12 @@ class PdfSplitterTest extends TestCase
         $mapping = ['dummy-1.pdf' => [1]];
         $outputFolder = __DIR__ . '/test';
 
+        $exception = $this->getTestException();
+
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
                     ->method('mustRun')
-                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
+                    ->will($this->throwException($exception));
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
@@ -46,6 +49,9 @@ class PdfSplitterTest extends TestCase
         $splitter = new Splitter($mockWrapper);
 
         $this->expectException(SplitException::class);
+        $this->expectExceptionMessage(
+            sprintf('Failed to split PDF "%s"! Error: %s', $inputFile, $exception->getMessage())
+        );
         $splitter->split($inputFile, $mapping, $outputFolder);
     }
 
@@ -58,10 +64,12 @@ class PdfSplitterTest extends TestCase
         $pdfErrorMessage = 'PDf error message';
         $pdfOutputMessage = 'PDf output message';
 
+        $exception = $this->getTestException();
+
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
                     ->method('mustRun')
-                    ->will($this->throwException($this->createMock(ProcessFailedException::class)));
+                    ->will($this->throwException($exception));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn($pdfErrorMessage);
@@ -83,8 +91,13 @@ class PdfSplitterTest extends TestCase
         try {
             $splitter->split($inputFile, $mapping, $outputFolder);
         } catch (SplitException $e) {
+            $this->assertSame(
+                sprintf('Failed to split PDF "%s"! Error: %s', $inputFile, $exception->getMessage()),
+                $e->getMessage()
+            );
             $this->assertSame($pdfErrorMessage, $e->getPdfError());
             $this->assertSame($pdfOutputMessage, $e->getPdfOutput());
+            $this->assertSame($exception, $e->getPrevious());
         }
     }
 
@@ -153,5 +166,10 @@ class PdfSplitterTest extends TestCase
         $splitter = new Splitter($mockWrapper);
 
         $splitter->split($inputFile, $mapping, null);
+    }
+
+    private function getTestException()
+    {
+        return new Exception('pdftk exception message');
     }
 }

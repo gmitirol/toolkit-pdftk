@@ -15,12 +15,12 @@ namespace Gmi\Toolkit\Pdftk;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ExceptionInterface;
 
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Util\FileSorter;
 
+use Exception;
 use SplFileInfo;
 
 /**
@@ -120,11 +120,11 @@ class Joiner
 
         try {
             $process->mustRun();
-        } catch (ExceptionInterface $e) {
+        } catch (Exception $e) {
             throw new JoinException(
-                sprintf('Failed to join PDF "%s"!', $output),
+                sprintf('Failed to join PDF "%s"! Error: %s', $output, $e->getMessage()),
                 0,
-                null,
+                $e,
                 $process->getErrorOutput(),
                 $process->getOutput()
             );

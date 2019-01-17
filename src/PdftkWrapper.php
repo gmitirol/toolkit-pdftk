@@ -19,6 +19,8 @@ use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
+use Exception;
+
 /**
  * Wrapper for PDFtk.
  *
@@ -134,14 +136,16 @@ class PdftkWrapper
         );
 
         $process = $this->createProcess($cmd);
-        $process->run();
 
-        if (!$process->isSuccessful()) {
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
             $exception = new PdfException(
-                sprintf('Failed to read PDF data from "%s"!', $pdf),
+                sprintf('Failed to read PDF data from "%s"! Error: %s', $pdf, $e->getMessage()),
                 0,
-                null,
-                $process->getErrorOutput()
+                $e,
+                $process->getErrorOutput(),
+                $process->getOutput()
             );
         }
 
@@ -189,14 +193,16 @@ class PdftkWrapper
         );
 
         $process = $this->createProcess($cmd);
-        $process->run();
 
-        if (!$process->isSuccessful()) {
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
             $exception = new PdfException(
-                sprintf('Failed to write PDF data to "%s"!', $outfile),
+                sprintf('Failed to write PDF data to "%s"! Error: %s', $outfile, $e->getMessage()),
                 0,
-                null,
-                $process->getErrorOutput()
+                $e,
+                $process->getErrorOutput(),
+                $process->getOutput()
             );
         }
 

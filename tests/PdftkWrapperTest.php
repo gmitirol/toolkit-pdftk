@@ -21,6 +21,8 @@ use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
+use Exception;
+
 class PdftkWrapperTest extends TestCase
 {
     public function testGuessBinary()
@@ -66,17 +68,18 @@ class PdftkWrapperTest extends TestCase
         $binary = __DIR__ . '/Fixtures/binary.sh';
         $pdf = __DIR__ . '/Fixtures/example.pdf';
 
+        $exception = $this->getTestException();
+
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
+                    ->method('mustRun')
+                    ->will($this->throwException($exception));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn('Error');
-        $mockProcess->expects($this->never())
-                    ->method('getOutput');
+        $mockProcess->expects($this->once())
+                    ->method('getOutput')
+                    ->willReturn('Output');
 
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
@@ -86,6 +89,9 @@ class PdftkWrapperTest extends TestCase
 
         $pdftk = new PdftkWrapper($binary, $mockProcessFactory);
         $this->expectException(PdfException::class);
+        $this->expectExceptionMessage(
+            sprintf('Failed to read PDF data from "%s"! Error: %s', $pdf, $exception->getMessage())
+        );
         $pdftk->getPdfDataDump($pdf);
     }
 
@@ -95,18 +101,20 @@ class PdftkWrapperTest extends TestCase
         $pdf = __DIR__ . '/Fixtures/example.pdf';
 
         $pdfErrorMessage = 'PDf error message';
+        $pdfOutputMessage = 'PDf output message';
+
+        $exception = $this->getTestException();
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
+                    ->method('mustRun')
+                    ->will($this->throwException($exception));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn($pdfErrorMessage);
-        $mockProcess->expects($this->never())
-                    ->method('getOutput');
+        $mockProcess->expects($this->once())
+                    ->method('getOutput')
+                    ->willReturn($pdfOutputMessage);
 
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
@@ -119,7 +127,13 @@ class PdftkWrapperTest extends TestCase
         try {
             $pdftk->getPdfDataDump($pdf);
         } catch (PdfException $e) {
+            $this->assertSame(
+                sprintf('Failed to read PDF data from "%s"! Error: %s', $pdf, $exception->getMessage()),
+                $e->getMessage()
+            );
             $this->assertSame($pdfErrorMessage, $e->getPdfError());
+            $this->assertSame($pdfOutputMessage, $e->getPdfOutput());
+            $this->assertSame($exception, $e->getPrevious());
         }
     }
 
@@ -129,17 +143,18 @@ class PdftkWrapperTest extends TestCase
         $pdf = __DIR__ . '/Fixtures/example.pdf';
         $target = tempnam(sys_get_temp_dir(), 'pdf');
 
+        $exception = $this->getTestException();
+
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
+                    ->method('mustRun')
+                    ->will($this->throwException($exception));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn('Error');
-        $mockProcess->expects($this->never())
-                    ->method('getOutput');
+        $mockProcess->expects($this->once())
+                    ->method('getOutput')
+                    ->willReturn('Output');
 
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
@@ -149,6 +164,9 @@ class PdftkWrapperTest extends TestCase
 
         $pdftk = new PdftkWrapper($binary, $mockProcessFactory);
         $this->expectException(PdfException::class);
+        $this->expectExceptionMessage(
+            sprintf('Failed to write PDF data to "%s"! Error: %s', $target, $exception->getMessage())
+        );
         $pdftk->updatePdfDataFromDump($pdf, 'Example data', $target);
     }
 
@@ -159,18 +177,20 @@ class PdftkWrapperTest extends TestCase
         $target = tempnam(sys_get_temp_dir(), 'pdf');
 
         $pdfErrorMessage = 'PDf error message';
+        $pdfOutputMessage = 'PDf output message';
+
+        $exception = $this->getTestException();
 
         $mockProcess = $this->createMock(Process::class);
         $mockProcess->expects($this->once())
-                    ->method('run');
-        $mockProcess->expects($this->once())
-                    ->method('isSuccessful')
-                    ->willReturn(false);
+                    ->method('mustRun')
+                    ->will($this->throwException($exception));
         $mockProcess->expects($this->once())
                     ->method('getErrorOutput')
                     ->willReturn($pdfErrorMessage);
-        $mockProcess->expects($this->never())
-                    ->method('getOutput');
+        $mockProcess->expects($this->once())
+                    ->method('getOutput')
+                    ->willReturn($pdfOutputMessage);
 
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
@@ -183,7 +203,18 @@ class PdftkWrapperTest extends TestCase
         try {
             $pdftk->updatePdfDataFromDump($pdf, 'Example data', $target);
         } catch (PdfException $e) {
+            $this->assertSame(
+                sprintf('Failed to write PDF data to "%s"! Error: %s', $target, $exception->getMessage()),
+                $e->getMessage()
+            );
             $this->assertSame($pdfErrorMessage, $e->getPdfError());
+            $this->assertSame($pdfOutputMessage, $e->getPdfOutput());
+            $this->assertSame($exception, $e->getPrevious());
         }
+    }
+
+    private function getTestException()
+    {
+        return new Exception('pdftk exception message');
     }
 }
