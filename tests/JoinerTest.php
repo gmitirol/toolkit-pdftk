@@ -21,7 +21,7 @@ use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Joiner;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
-use Gmi\Toolkit\Pdftk\Util\FileSorter;
+use Gmi\Toolkit\Pdftk\Util\FileSorterInterface;
 
 use ArrayObject;
 use Exception;
@@ -49,9 +49,9 @@ class JoinerTest extends TestCase
                    ->method('getIterator')
                    ->willReturn(new ArrayObject());
 
-        $mockSorter = $this->createMock(FileSorter::class);
+        $mockSorter = $this->createMock(FileSorterInterface::class);
         $mockSorter->expects($this->never())
-                   ->method('sortNaturally');
+                   ->method('sort');
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->never())
@@ -96,9 +96,9 @@ class JoinerTest extends TestCase
                    ->method('getIterator')
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
-        $mockSorter = $this->createMock(FileSorter::class);
+        $mockSorter = $this->createMock(FileSorterInterface::class);
         $mockSorter->expects($this->once())
-                   ->method('sortNaturally')
+                   ->method('sort')
                    ->with([$mockSplFileInfo])
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
@@ -154,9 +154,9 @@ class JoinerTest extends TestCase
                    ->method('getIterator')
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
-        $mockSorter = $this->createMock(FileSorter::class);
+        $mockSorter = $this->createMock(FileSorterInterface::class);
         $mockSorter->expects($this->once())
-                   ->method('sortNaturally')
+                   ->method('sort')
                    ->with([$mockSplFileInfo])
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
@@ -225,9 +225,9 @@ class JoinerTest extends TestCase
                    ->method('getIterator')
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
-        $mockSorter = $this->createMock(FileSorter::class);
+        $mockSorter = $this->createMock(FileSorterInterface::class);
         $mockSorter->expects($this->once())
-                   ->method('sortNaturally')
+                   ->method('sort')
                    ->with([$mockSplFileInfo])
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
@@ -289,9 +289,9 @@ class JoinerTest extends TestCase
                    ->method('getIterator')
                    ->willReturn(new ArrayObject([$mockSplFileInfo3, $mockSplFileInfo2, $mockSplFileInfo1]));
 
-        $mockSorter = $this->createMock(FileSorter::class);
+        $mockSorter = $this->createMock(FileSorterInterface::class);
         $mockSorter->expects($this->once())
-                   ->method('sortNaturally')
+                   ->method('sort')
                    ->with([$mockSplFileInfo3, $mockSplFileInfo2, $mockSplFileInfo1])
                    ->willReturn(new ArrayObject([$mockSplFileInfo1, $mockSplFileInfo2, $mockSplFileInfo3]));
 
@@ -355,9 +355,9 @@ class JoinerTest extends TestCase
                    ->method('getIterator')
                    ->willReturn(new ArrayObject([$mockSplFileInfo3, $mockSplFileInfo2, $mockSplFileInfo1]));
 
-        $mockSorter = $this->createMock(FileSorter::class);
+        $mockSorter = $this->createMock(FileSorterInterface::class);
         $mockSorter->expects($this->once())
-                   ->method('sortNaturally')
+                   ->method('sort')
                    ->with([$mockSplFileInfo3, $mockSplFileInfo2, $mockSplFileInfo1])
                    ->willReturn(new ArrayObject([$mockSplFileInfo1, $mockSplFileInfo2, $mockSplFileInfo3]));
 

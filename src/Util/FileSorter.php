@@ -31,6 +31,15 @@ class FileSorter
      */
     public function __construct()
     {
+        @trigger_error(
+            sprintf(
+                'The "%s" class is deprecated since toolkit-pdftk 1.2, use "%s" instead!',
+                self::class,
+                NaturalFileSorter::class
+            ),
+            E_USER_DEPRECATED
+        );
+
         $this->naturalSorter = function (SplFileInfo $a, SplFileInfo $b) {
             return strnatcasecmp($a->getRealPath(), $b->getRealPath());
         };

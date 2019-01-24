@@ -18,7 +18,7 @@ Installation
 The recommended way to install toolkit-pdftk is via composer.
 ```json
 "require": {
-    "gmi/toolkit-pdftk": "1.0.*"
+    "gmi/toolkit-pdftk": "1.2.*"
 }
 ```
 

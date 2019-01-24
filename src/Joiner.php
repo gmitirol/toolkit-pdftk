@@ -18,7 +18,8 @@ use Symfony\Component\Process\Process;
 
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
-use Gmi\Toolkit\Pdftk\Util\FileSorter;
+use Gmi\Toolkit\Pdftk\Util\FileSorterInterface;
+use Gmi\Toolkit\Pdftk\Util\NaturalFileSorter;
 
 use Exception;
 use SplFileInfo;
@@ -51,15 +52,15 @@ class Joiner
     /**
      * Constructor.
      *
-     * @param PdftkWrapper $wrapper
-     * @param Finder       $finder
-     * @param FileSorter   $sorter
+     * @param PdftkWrapper        $wrapper
+     * @param Finder              $finder
+     * @param FileSorterInterface $sorter
      */
-    public function __construct(PdftkWrapper $wrapper = null, Finder $finder = null, FileSorter $sorter = null)
+    public function __construct(PdftkWrapper $wrapper = null, Finder $finder = null, FileSorterInterface $sorter = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
         $this->finder = $finder ?: new Finder();
-        $this->sorter = $sorter ?: new FileSorter();
+        $this->sorter = $sorter ?: new NaturalFileSorter();
     }
 
     /**
@@ -163,6 +164,6 @@ class Joiner
      */
     private function sortFiles($files)
     {
-        return $this->sorter->sortNaturally($files);
+        return $this->sorter->sort($files);
     }
 }

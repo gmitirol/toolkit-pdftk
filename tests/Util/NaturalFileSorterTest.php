@@ -4,17 +4,13 @@ namespace Gmi\Toolkit\Pdftk\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
 
-use Gmi\Toolkit\Pdftk\Util\FileSorter;
+use Gmi\Toolkit\Pdftk\Util\NaturalFileSorter;
 
-use Closure;
 use SplFileInfo;
 
-class FileSorterTest extends TestCase
+class NaturalFileSorterTest extends TestCase
 {
-    /**
-     * @group legacy
-     */
-    public function testSortNaturally()
+    public function testSort()
     {
         $file1 = $this->createMock(SplFileInfo::class);
         $file1->expects($this->any())
@@ -43,19 +39,10 @@ class FileSorterTest extends TestCase
 
         $files = [$file1, $file2, $file3, $file4, $file5];
 
-        $sorter = new FileSorter();
-        $result = $sorter->sortNaturally($files);
+        $sorter = new NaturalFileSorter();
+        $result = $sorter->sort($files);
 
         $expected = [$file2, $file3, $file1, $file5, $file4];
-        $this->assertEquals($expected, $result);
-    }
-
-    /**
-     * @group legacy
-     */
-    public function testGetNaturalSorter()
-    {
-        $sorter = new FileSorter();
-        $this->assertInstanceOf(Closure::class, $sorter->getNaturalSorter());
+        $this->assertSame($expected, $result);
     }
 }
