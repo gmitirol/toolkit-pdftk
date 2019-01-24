@@ -40,7 +40,7 @@ class Joiner
     private $finder;
 
     /**
-     * @var FileSorter
+     * @var FileSorterInterface
      */
     private $sorter;
 
