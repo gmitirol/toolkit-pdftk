@@ -55,7 +55,6 @@ class Splitter
             $process = $this->wrapper->createProcess($commandLine);
             $process->setTimeout(300);
 
-
             try {
                 $process->mustRun();
             } catch (Exception $e) {

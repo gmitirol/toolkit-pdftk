@@ -18,8 +18,8 @@ use Symfony\Component\Process\Process;
 
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
-use Gmi\Toolkit\Pdftk\Util\FileSorterInterface;
-use Gmi\Toolkit\Pdftk\Util\NaturalFileSorter;
+use Gmi\Toolkit\Sorter\FileSorterInterface;
+use Gmi\Toolkit\Sorter\NaturalFileSorter;
 
 use Exception;
 use SplFileInfo;
@@ -89,7 +89,7 @@ class Joiner
         }
 
         // array of sorted files
-        $files = $this->sortFiles($foundFiles);
+        $files = $this->sorter->sort($foundFiles);
 
         return $this->join($files, $output);
     }
@@ -153,17 +153,5 @@ class Joiner
         }
 
         return $results;
-    }
-
-    /**
-     * Sort found files by natural sorting.
-     *
-     * @param SplFileInfo[] $files
-     *
-     * @return SplFileInfo[]
-     */
-    private function sortFiles($files)
-    {
-        return $this->sorter->sort($files);
     }
 }

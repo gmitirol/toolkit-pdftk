@@ -21,7 +21,7 @@ use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Joiner;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
-use Gmi\Toolkit\Pdftk\Util\FileSorterInterface;
+use Gmi\Toolkit\Sorter\FileSorterInterface;
 
 use ArrayObject;
 use Exception;
