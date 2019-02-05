@@ -2,7 +2,7 @@
 /**
  * General PDF exception.
  *
- * @copyright 2014-2018 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
