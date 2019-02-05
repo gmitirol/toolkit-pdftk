@@ -11,7 +11,7 @@
  * @package pdftk
  */
 
-namespace Gmi\Toolkit\PdfTk\Exception;
+namespace Gmi\Toolkit\Pdftk\Exception;
 
 use Exception;
 
