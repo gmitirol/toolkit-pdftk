@@ -1,9 +1,8 @@
 stages:
   - test
 
-test:
+.test_template:
   stage: test
-  image: $CI_REGISTRY/docker/alpine37-php71:v2
   cache:
     untracked: false
     paths:
@@ -25,3 +24,15 @@ test:
     - sami update sami.php
   tags:
     - shared
+
+test_php56:
+    extends: .test_template
+    image: $CI_REGISTRY/docker/alpine38-php56:v1
+
+test_php71:
+    extends: .test_template
+    image: $CI_REGISTRY/docker/alpine37-php71:v2
+
+test_php72:
+    extends: .test_template
+    image: $CI_REGISTRY/docker/alpine38-php72:v1
