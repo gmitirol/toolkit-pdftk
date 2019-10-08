@@ -191,7 +191,7 @@ class Bookmarks
     }
 
     /**
-     * Sets the maximum page number of the PDF to validate page numberrs.
+     * Sets the maximum page number of the PDF to validate page numbers.
      *
      * @internal
      *
