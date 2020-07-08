@@ -36,3 +36,7 @@ test_php71:
 test_php72:
     extends: .test_template
     image: $CI_REGISTRY/docker/alpine38-php72:v1
+
+test_php73:
+    extends: .test_template
+    image: $CI_REGISTRY/docker/alpine312-php73:v1
