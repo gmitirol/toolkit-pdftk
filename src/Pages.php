@@ -87,7 +87,8 @@ class Pages
     {
         $matches = [];
         $regex = '/PageMediaBegin\nPageMediaNumber: (?<page>.+)\nPageMediaRotation: (?<rotation>[0-9]+)\n' .
-                 'PageMediaRect: .*\nPageMediaDimensions: (?<dim>([0-9]+(\.[0-9]+)?) ([0-9]+(\.[0-9]+)?))/';
+                 'PageMediaRect: .*\n' .
+                 'PageMediaDimensions: (?<dim>(([0-9]\,)?[0-9]+(\.[0-9]+)?) (([0-9]\,)?[0-9]+(\.[0-9]+)?))/';
         preg_match_all($regex, $dump, $matches, PREG_SET_ORDER);
 
         $this->pages = [];
@@ -99,8 +100,8 @@ class Pages
             $page
                 ->setPageNumber((int) $p['page'])
                 ->setRotation((int) $p['rotation'])
-                ->setWidth((float) $dimensions[0])
-                ->setHeight((float) $dimensions[1])
+                ->setWidth((float) str_replace(',', '', $dimensions[0]))
+                ->setHeight((float) str_replace(',', '', $dimensions[1]))
             ;
 
             $this->pages[] = $page;

@@ -89,4 +89,26 @@ class PagesTest extends TestCase
         $this->assertSame(self::A3_WIDTH, $page6->getHeightMm());
         $this->assertSame(0, $page6->getRotation());
     }
+
+    public function testImportMixedHugePage()
+    {
+        $file = __DIR__ . '/Fixtures/mixed-hugepage.pdf';
+        $p = new Pages();
+        $p->import($file);
+
+        $pages = $p->all();
+        $this->assertSame(2, count($pages));
+
+        $page1 = $pages[0];
+        $this->assertSame(self::A4_WIDTH, $page1->getWidthMm());
+        $this->assertSame(self::A4_HEIGHT, $page1->getHeightMm());
+        $this->assertSame(0, $page1->getRotation());
+        $this->assertSame(1, $page1->getPageNumber());
+
+        $page2 = $pages[1];
+        $this->assertSame(1189, $page2->getWidthMm());
+        $this->assertSame(841, $page2->getHeightMm());
+        $this->assertSame(0, $page2->getRotation());
+        $this->assertSame(2, $page2->getPageNumber());
+    }
 }
