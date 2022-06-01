@@ -22,6 +22,7 @@ stages:
     - phpcs $CI_PROJECT_DIR/src $CI_PROJECT_DIR/tests --standard=PSR2
     - php vendor/bin/phpunit $CI_PROJECT_DIR/tests --coverage-text -vv --colors=never
     - sami update sami.php
+  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
   tags:
     - shared
 
