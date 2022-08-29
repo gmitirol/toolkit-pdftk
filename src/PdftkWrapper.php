@@ -208,7 +208,7 @@ class PdftkWrapper
 
         unlink($tempfile);
 
-        if ($temporaryOutFile) {
+        if ($temporaryOutFile && !isset($exception)) {
             unlink($pdf);
             rename($outfile, $pdf);
         }
