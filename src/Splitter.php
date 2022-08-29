@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -53,7 +53,6 @@ class Splitter
 
         foreach ($commandLines as $commandLine) {
             $process = $this->wrapper->createProcess($commandLine);
-            $process->setTimeout(300);
 
             try {
                 $process->mustRun();
