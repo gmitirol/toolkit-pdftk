@@ -18,7 +18,7 @@ Installation
 The recommended way to install toolkit-pdftk is via composer.
 ```json
 "require": {
-    "gmi/toolkit-pdftk": "2.0.*"
+    "gmi/toolkit-pdftk": "2.2.*"
 }
 ```
 
@@ -48,7 +48,7 @@ $pdftk->bookmarks()->add($exampleBookmark);
 // set metadata entry for the PDF
 $pdftk->metadata()->set('Author', 'Jane Doe');
 
-// apply bookmarks and metadata to the source PDf using a specified target PDF
+// apply bookmarks and metadata to the source PDF using a specified target PDF
 $pdftk->apply($source, $target);
 ```
 
