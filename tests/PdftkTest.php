@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 use Gmi\Toolkit\Pdftk\Bookmark;
 use Gmi\Toolkit\Pdftk\Joiner;
+use Gmi\Toolkit\Pdftk\PageOrder;
 use Gmi\Toolkit\Pdftk\Pdftk;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Pdftk\Splitter;
@@ -126,5 +127,14 @@ class PdftkTest extends TestCase
 
         $this->assertInstanceOf(Splitter::class, $splitter);
         $this->assertSame($pdftk->getSplitter(), $splitter);
+    }
+
+    public function testGetPageOrder()
+    {
+        $pdftk = new Pdftk();
+        $pageOrder = $pdftk->order();
+
+        $this->assertInstanceOf(PageOrder::class, $pageOrder);
+        $this->assertSame($pdftk->getPageOrder(), $pageOrder);
     }
 }

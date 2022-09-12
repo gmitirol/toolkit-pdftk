@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -43,6 +43,11 @@ class Pdftk
     private $splitter;
 
     /**
+     * @var PageOrder
+     */
+    private $pageOrder;
+
+    /**
      * @var PdftkWrapper
      */
     private $wrapper;
@@ -68,6 +73,7 @@ class Pdftk
         $this->pages = new Pages($wrapper);
         $this->joiner = new Joiner($wrapper);
         $this->splitter = new Splitter($wrapper);
+        $this->pageOrder = new PageOrder($wrapper);
     }
 
     /**
@@ -168,6 +174,26 @@ class Pdftk
     public function splitter()
     {
         return $this->getSplitter();
+    }
+
+    /**
+     * Returns the PDF page order changer.
+     *
+     * @return Splitter
+     */
+    public function getPageOrder()
+    {
+        return $this->pageOrder;
+    }
+
+    /**
+     * Alias for getPageOrder().
+     *
+     * @return Splitter
+     */
+    public function order()
+    {
+        return $this->getPageOrder();
     }
 
     /**
