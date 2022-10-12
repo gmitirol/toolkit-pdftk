@@ -58,6 +58,14 @@ class Bookmarks
      */
     public function add(Bookmark $bookmark)
     {
+        if (0 === $bookmark->getPageNumber()) {
+            return;
+        }
+
+        if ($bookmark->getLevel() < 1 || $bookmark->getLevel() > 99) {
+            throw new PdfException(sprintf('Invalid bookmark level: %s', $bookmark->getLevel()));
+        }
+
         if (!is_int($bookmark->getPageNumber()) || $bookmark->getPageNumber() < 1) {
             throw new PdfException(sprintf('Invalid page number: %s', $bookmark->getPageNumber()));
         } elseif ($this->maxpage > 0 && $bookmark->getPageNumber() > $this->maxpage) {

@@ -27,13 +27,29 @@ class BookmarksTest extends TestCase
         $bookmark = new Bookmark();
         $bookmark
             ->setTitle('Example')
+            ->setPageNumber(-1)
+            ->setLevel(1)
+        ;
+
+        $bm = new Bookmarks();
+        $this->expectException(PdfException::Class);
+        $this->expectExceptionMessage('Invalid page number: -1');
+        $bm->add($bookmark);
+    }
+
+    public function testAddBookmarkPageNumberZeroIgnored()
+    {
+        $bookmark = new Bookmark();
+        $bookmark
+            ->setTitle('Bookmark with target page number 0 - invalid and thus ignored')
             ->setPageNumber(0)
             ->setLevel(1)
         ;
 
-        $this->expectException(PdfException::Class);
         $bm = new Bookmarks();
+        $this->assertEmpty($bm->all());
         $bm->add($bookmark);
+        $this->assertEmpty($bm->all());
     }
 
     public function testAddOutofBoundsPageNumber()
@@ -45,8 +61,9 @@ class BookmarksTest extends TestCase
             ->setLevel(1)
         ;
 
-        $this->expectException(PdfException::Class);
         $bm = new Bookmarks();
+        $this->expectException(PdfException::Class);
+        $this->expectExceptionMessage('Page number out of range!');
         $bm
             ->setMaxpage(3)
             ->add($bookmark)
@@ -58,12 +75,13 @@ class BookmarksTest extends TestCase
         $bookmark = new Bookmark();
         $bookmark
             ->setTitle('Example')
-            ->setPageNumber(0)
-            ->setLevel(1)
+            ->setPageNumber(1)
+            ->setLevel(0)
         ;
 
-        $this->expectException(PdfException::Class);
         $bm = new Bookmarks();
+        $this->expectException(PdfException::Class);
+        $this->expectExceptionMessage('Invalid bookmark level: 0');
         $bm->add($bookmark);
     }
 
