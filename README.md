@@ -4,7 +4,6 @@ PHP Toolkit - PDFtk
 This library provides an object-oriented, simple interface for the most important PDFtk features.
 
 The current build status and code analysis can be found here:
-  * [Travis CI](https://travis-ci.org/gmitirol/toolkit-pdftk)
   * [Scrutinizer CI](https://scrutinizer-ci.com/g/gmitirol/toolkit-pdftk/)
 
 Requirements
