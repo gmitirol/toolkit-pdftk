@@ -26,10 +26,6 @@ stages:
   tags:
     - shared
 
-test_php56:
-    extends: .test_template
-    image: $CI_REGISTRY/docker/alpine38-php56:v1
-
 test_php71:
     extends: .test_template
     image: $CI_REGISTRY/docker/alpine37-php71:v2
