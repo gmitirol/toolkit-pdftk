@@ -47,7 +47,7 @@ class Splitter
      *
      * @throws SplitException if the PDF split fails
      */
-    public function split($inputFile, $mapping, $outputFolder = null)
+    public function split(string $inputFile, array $mapping, string $outputFolder = null): void
     {
         $commandLines = $this->buildCommandLines($inputFile, $mapping, $outputFolder);
 
@@ -77,7 +77,7 @@ class Splitter
      *
      * @return string[]
      */
-    private function buildCommandLines($inputFile, $mapping, $outputFolder = null)
+    private function buildCommandLines(string $inputFile, array $mapping, string $outputFolder = null): array
     {
         $commandLines = [];
 

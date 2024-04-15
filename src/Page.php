@@ -47,12 +47,8 @@ class Page
 
     /**
      * Sets the page number.
-     *
-     * @param int $pageNumber
-     *
-     * @return self
      */
-    public function setPageNumber($pageNumber)
+    public function setPageNumber(int $pageNumber): self
     {
         $this->pageNumber = $pageNumber;
 
@@ -61,22 +57,16 @@ class Page
 
     /**
      * Returns the page number.
-     *
-     * @return int
      */
-    public function getPageNumber()
+    public function getPageNumber(): int
     {
         return $this->pageNumber;
     }
 
     /**
      * Sets the page height.
-     *
-     * @param float $height
-     *
-     * @return self
      */
-    public function setHeight($height)
+    public function setHeight(float $height): self
     {
         $this->height = $height;
 
@@ -85,32 +75,24 @@ class Page
 
     /**
      * Returns the page height.
-     *
-     * @return float
      */
-    public function getHeight()
+    public function getHeight(): float
     {
         return $this->height;
     }
 
     /**
      * Returns the page height in millimeters, rounded to the millimeter.
-     *
-     * @return int
      */
-    public function getHeightMm()
+    public function getHeightMm(): int
     {
         return (int) round($this->convertPointToMm($this->height), 0);
     }
 
     /**
      * Sets the page width.
-     *
-     * @param float $width
-     *
-     * @return self
      */
-    public function setWidth($width)
+    public function setWidth(float $width): self
     {
         $this->width = $width;
 
@@ -119,32 +101,24 @@ class Page
 
     /**
      * Returns the page width.
-     *
-     * @return float
      */
-    public function getWidth()
+    public function getWidth(): float
     {
         return $this->width;
     }
 
     /**
      * Returns the page width in millimeters, rounded to the millimeter.
-     *
-     * @return int
      */
-    public function getWidthMm()
+    public function getWidthMm(): int
     {
         return (int) round($this->convertPointToMm($this->width), 0);
     }
 
     /**
      * Sets the page rotation.
-     *
-     * @param int $rotation
-     *
-     * @return self
      */
-    public function setRotation($rotation)
+    public function setRotation(int $rotation): self
     {
         $this->rotation = $rotation;
 
@@ -153,22 +127,16 @@ class Page
 
     /**
      * Returns the page rotation.
-     *
-     * @return int
      */
-    public function getRotation()
+    public function getRotation(): int
     {
         return $this->rotation;
     }
 
     /**
      * Converts a measure of PostScript points to millimeters.
-     *
-     * @param float $point
-     *
-     * @return float
      */
-    private function convertPointToMm($point)
+    private function convertPointToMm(float $point): float
     {
         return $point / 72 * 25.4;
     }

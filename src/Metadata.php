@@ -51,14 +51,9 @@ class Metadata
     /**
      * Set metadata key/value.
      *
-     * @param string $key
-     * @param string $value
-     *
-     * @return self
-     *
      * @throws PdftkException
      */
-    public function set($key, $value)
+    public function set(string $key, string $value): self
     {
         $this->checkKey($key);
 
@@ -70,13 +65,11 @@ class Metadata
     /**
      * Get metadata value from key.
      *
-     * @param string $key
-     *
      * @return string|bool
      *
      * @throws PdftkException
      */
-    public function get($key)
+    public function get(string $key)
     {
         $this->checkKey($key);
 
@@ -90,13 +83,9 @@ class Metadata
     /**
      * Unset metadata for key.
      *
-     * @param string $key
-     *
-     * @return self
-     *
      * @throws PdftkException
      */
-    public function remove($key)
+    public function remove(string $key): self
     {
         $this->checkKey($key);
 
@@ -108,13 +97,9 @@ class Metadata
     /**
      * Checks whether a key is set.
      *
-     * @param string $key
-     *
-     * @return bool
-     *
      * @throws PdftkException
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $this->checkKey($key);
 
@@ -124,29 +109,25 @@ class Metadata
     /**
      * Returns all current keys.
      *
-     * @return array
+     * @return string[]
      */
-    public function keys()
+    public function keys(): array
     {
         return array_keys($this->metadata);
     }
 
     /**
      * Returns all metadata entries [key => value].
-     *
-     * @return array
      */
-    public function all()
+    public function all(): array
     {
         return $this->metadata;
     }
 
     /**
      * Remove all metadata.
-     *
-     * @return self
      */
-    public function clear()
+    public function clear(): self
     {
         $this->metadata = [];
 
@@ -156,14 +137,9 @@ class Metadata
     /**
      * Apply metadata to file.
      *
-     * @param string $infile
-     * @param string $outfile
-     *
-     * @return self
-     *
      * @throws PdftkException
      */
-    public function apply($infile, $outfile = null)
+    public function apply(string $infile, string $outfile = null): self
     {
         $metaBlock = '';
         foreach ($this->metadata as $k => $v) {
@@ -176,12 +152,8 @@ class Metadata
 
     /**
      * Imports metadata from a PDF file.
-     *
-     * @param string $infile
-     *
-     * @return self
      */
-    public function import($infile)
+    public function import(string $infile): self
     {
         $dump = $this->wrapper->getPdfDataDump($infile);
         $this->importFromDump($dump);
@@ -191,12 +163,8 @@ class Metadata
 
     /**
      * Imports PDF metadata from a pdftk dump.
-     *
-     * @param string $dump
-     *
-     * @return self
      */
-    public function importFromDump($dump)
+    public function importFromDump(string $dump): self
     {
         $matches = [];
         $regex = '/InfoBegin??\r?\nInfoKey: (?<key>.*)??\r?\nInfoValue: (?<value>.*)??\r?\n/';
@@ -212,14 +180,9 @@ class Metadata
     /**
      * Builds an InfoBlock string.
      *
-     * @param string $key
-     * @param string $value
-     *
-     * @return string
-     *
      * @throws PdftkException
      */
-    private function buildInfoBlock($key, $value)
+    private function buildInfoBlock(string $key, string $value): string
     {
         $this->checkKey($key);
 
@@ -232,11 +195,9 @@ class Metadata
     /**
      * Checks a metadata key.
      *
-     * @param string $key
-     *
      * @throws PdfException
      */
-    private function checkKey($key)
+    private function checkKey(string $key): void
     {
         if (!is_string($key) || empty($key)) {
             throw new PdfException(sprintf('Invalid key name "%s"!', $key));

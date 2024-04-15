@@ -51,10 +51,6 @@ class Joiner
 
     /**
      * Constructor.
-     *
-     * @param PdftkWrapper        $wrapper
-     * @param Finder              $finder
-     * @param FileSorterInterface $sorter
      */
     public function __construct(PdftkWrapper $wrapper = null, Finder $finder = null, FileSorterInterface $sorter = null)
     {
@@ -66,14 +62,10 @@ class Joiner
     /**
      * Joins all PDFs in a folder matching a pattern, naturally sorted, to one file.
      *
-     * @param string $inputFolder
-     * @param string $pattern
-     * @param string $output
-     *
      * @throws FileNotFoundException if no matching input files are found in the input folder
      * @throws JoinException if the PDF join fails
      */
-    public function joinByPattern($inputFolder, $pattern, $output)
+    public function joinByPattern(string $inputFolder, string $pattern, string $output)
     {
         // array of files which match the pattern
         $foundFiles = $this->getFiles($inputFolder, $pattern);
@@ -97,12 +89,11 @@ class Joiner
     /**
      * Joins a list of PDFs (represented by SplFileInfo instances) to one file.
      *
-     * @param SplFileInfo[] $files
-     * @param string        $output
+     * @param SplFileInfo[] $files Either array or ArrayObject
      *
      * @throws JoinException if the PDF join fails
      */
-    public function join($files, $output)
+    public function join($files, string $output): void
     {
         $filePaths = [];
         foreach ($files as $file) {
@@ -136,12 +127,9 @@ class Joiner
     /**
      * Finds all files inside the folder with specific pattern.
      *
-     * @param string $folder
-     * @param string $pattern
-     *
      * @return SplFileInfo[]
      */
-    private function getFiles($folder, $pattern)
+    private function getFiles(string $folder, string $pattern): array
     {
         $files = $this->finder->files()->name($pattern)->in($folder);
 

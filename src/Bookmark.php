@@ -41,12 +41,8 @@ class Bookmark
 
     /**
      * Sets the bookmark title.
-     *
-     * @param string $title
-     *
-     * @return self
      */
-    public function setTitle($title)
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
@@ -55,22 +51,16 @@ class Bookmark
 
     /**
      * Returns the bookmark title.
-     *
-     * @return string
      */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
 
     /**
      * Sets the bookmark page.
-     *
-     * @param int $pageNumber
-     *
-     * @return self
      */
-    public function setPageNumber($pageNumber)
+    public function setPageNumber(int $pageNumber): self
     {
         $this->pageNumber = $pageNumber;
 
@@ -79,22 +69,16 @@ class Bookmark
 
     /**
      * Returns the bookmark page.
-     *
-     * @return int
      */
-    public function getPageNumber()
+    public function getPageNumber(): int
     {
         return $this->pageNumber;
     }
 
     /**
      * Sets the bookmark level.
-     *
-     * @param int $level
-     *
-     * @return self
      */
-    public function setLevel($level)
+    public function setLevel(int $level): self
     {
         $this->level = $level;
 
@@ -103,10 +87,8 @@ class Bookmark
 
     /**
      * Returns the bookmark level.
-     *
-     * @return int
      */
-    public function getLevel()
+    public function getLevel(): int
     {
         return $this->level;
     }

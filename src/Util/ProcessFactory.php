@@ -29,10 +29,8 @@ class ProcessFactory
      *
      * @param string $commandLine Command line of the process
      * @param int    $timeout     Symfony process timeout
-     *
-     * @return Process
      */
-    public function createProcess($commandLine, $timeout = self::PROCESS_DEFAULT_TIMEOUT)
+    public function createProcess(string $commandLine, int $timeout = self::PROCESS_DEFAULT_TIMEOUT): Process
     {
         // support old (Symfony 2.7 to 4.1) and new (Symfony 4.2+) syntax to build Symfony Process instances.
         $process = $this->useNewSyntax() ? Process::fromShellCommandline($commandLine) : new Process($commandLine);
@@ -45,10 +43,8 @@ class ProcessFactory
      * Returns whether the new syntax to build Symfony Process instances from a command line should be used.
      *
      * @see https://github.com/symfony/symfony/pull/27821
-     *
-     * @return bool
      */
-    private function useNewSyntax()
+    private function useNewSyntax(): bool
     {
         return method_exists(Process::class, 'fromShellCommandline');
     }

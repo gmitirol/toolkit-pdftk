@@ -51,15 +51,11 @@ class Bookmarks
 
     /**
      * Add bookmark to page.
-     *
-     * @param Bookmark $bookmark
-     *
-     * @return self
      */
-    public function add(Bookmark $bookmark)
+    public function add(Bookmark $bookmark): self
     {
         if (0 === $bookmark->getPageNumber()) {
-            return;
+            return $this;
         }
 
         if ($bookmark->getLevel() < 1 || $bookmark->getLevel() > 99) {
@@ -82,19 +78,15 @@ class Bookmarks
      *
      * @return Bookmark[]
      */
-    public function all()
+    public function all(): array
     {
         return $this->bookmarks;
     }
 
     /**
      * Deletes a bookmark.
-     *
-     * @param Bookmark $bookmark
-     *
-     * @return self
      */
-    public function remove(Bookmark $bookmark)
+    public function remove(Bookmark $bookmark): self
     {
         foreach ($this->bookmarks as $key => $currentBookmark) {
             // weak comparison - value objects with equal values are considered equal
@@ -110,12 +102,8 @@ class Bookmarks
 
     /**
      * Delete bookmark from page.
-     *
-     * @param int $pageNumber
-     *
-     * @return self
      */
-    public function removeByPageNumber($pageNumber)
+    public function removeByPageNumber(int $pageNumber): self
     {
         foreach ($this->bookmarks as $key => $currentBookmark) {
             if ($currentBookmark->getPageNumber() === $pageNumber) {
@@ -130,10 +118,8 @@ class Bookmarks
 
     /**
      * Remove all bookmarks.
-     *
-     * @return self
      */
-    public function clear()
+    public function clear(): self
     {
         $this->bookmarks = [];
 
@@ -142,13 +128,8 @@ class Bookmarks
 
     /**
      * Apply bookmarks to PDF file.
-     *
-     * @param string $infile
-     * @param string $outfile
-     *
-     * @return self
      */
-    public function apply($infile, $outfile = null)
+    public function apply(string $infile, string $outfile = null): self
     {
         $this->wrapper->updatePdfDataFromDump($infile, $this->buildBookmarksBlock(), $outfile);
 
@@ -157,12 +138,8 @@ class Bookmarks
 
     /**
      * Imports bookmarks from a PDF file.
-     *
-     * @param string $infile
-     *
-     * @return self
      */
-    public function import($infile)
+    public function import(string $infile): self
     {
         $dump = $this->wrapper->getPdfDataDump($infile);
         $this->importFromDump($dump);
@@ -172,12 +149,8 @@ class Bookmarks
 
     /**
      * Imports bookmarks from a pdftk dump.
-     *
-     * @param string $dump
-     *
-     * @return self
      */
-    public function importFromDump($dump)
+    public function importFromDump(string $dump): self
     {
         $matches = [];
         $regex = '/BookmarkBegin\nBookmarkTitle: (?<title>.+)\n' .
@@ -202,12 +175,8 @@ class Bookmarks
      * Sets the maximum page number of the PDF to validate page numbers.
      *
      * @internal
-     *
-     * @param int $maxpage
-     *
-     * @return self
      */
-    public function setMaxpage($maxpage)
+    public function setMaxpage(int $maxpage): self
     {
         $this->maxpage = $maxpage;
 
@@ -216,10 +185,8 @@ class Bookmarks
 
     /**
      * Builds an Bookmark string for all bookmarks.
-     *
-     * @return string
      */
-    private function buildBookmarksBlock()
+    private function buildBookmarksBlock(): string
     {
         $result = '';
 
@@ -232,12 +199,8 @@ class Bookmarks
 
     /**
      * Builds an Bookmark string for a single bookmark.
-     *
-     * @param Bookmark $bookmark
-     *
-     * @return string
      */
-    private function buildBookmarkBlock(Bookmark $bookmark)
+    private function buildBookmarkBlock(Bookmark $bookmark): string
     {
         return
             'BookmarkBegin' . PHP_EOL .
@@ -249,7 +212,7 @@ class Bookmarks
     /**
      * Resets the bookmark array indizes (e.g. after removal of a bookmark).
      */
-    private function resetArrayIndizes()
+    private function resetArrayIndizes(): void
     {
         $this->bookmarks = array_values($this->bookmarks);
     }

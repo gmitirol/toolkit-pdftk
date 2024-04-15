@@ -73,7 +73,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->set(null, 'mplx');
+        $meta->set(0, 'mplx');
     }
 
     public function testGetInvalidKey()
@@ -81,7 +81,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->get(null);
+        $meta->get(0);
     }
 
     public function testCheckInvalidKey()
@@ -89,7 +89,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->has(null);
+        $meta->has(0);
     }
 
     public function testRemoveInvalidKey()
@@ -97,7 +97,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->remove(null);
+        $meta->remove(0);
     }
 
     public function testClear()

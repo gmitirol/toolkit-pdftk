@@ -44,17 +44,15 @@ class Pages
      *
      * @return Page[]
      */
-    public function all()
+    public function all(): array
     {
         return $this->pages;
     }
 
     /**
      * Remove all pages.
-     *
-     * @return self
      */
-    public function clear()
+    public function clear(): self
     {
         $this->pages = [];
 
@@ -63,12 +61,8 @@ class Pages
 
     /**
      * Imports pages from a PDF file.
-     *
-     * @param string $infile
-     *
-     * @return self
      */
-    public function import($infile)
+    public function import(string $infile): self
     {
         $dump = $this->wrapper->getPdfDataDump($infile);
         $this->importFromDump($dump);
@@ -78,12 +72,8 @@ class Pages
 
     /**
      * Imports page meta data from a pdftk dump.
-     *
-     * @param string $dump
-     *
-     * @return $this
      */
-    public function importFromDump($dump)
+    public function importFromDump(string $dump): self
     {
         $matches = [];
         $regex = '/PageMediaBegin\nPageMediaNumber: (?<page>.+)\nPageMediaRotation: (?<rotation>[0-9]+)\n' .

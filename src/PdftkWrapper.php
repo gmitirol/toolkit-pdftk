@@ -41,12 +41,9 @@ class PdftkWrapper
     /**
      * Constructor.
      *
-     * @param string         $pdftkBinary
-     * @param ProcessFactory $processFactory
-     *
      * @throws FileNotFoundException
      */
-    public function __construct($pdftkBinary = null, $processFactory = null)
+    public function __construct(string $pdftkBinary = null, ProcessFactory $processFactory = null)
     {
         $this->setBinary($pdftkBinary ?: $this->guessBinary(PHP_OS));
         $this->processFactory = $processFactory ?: new ProcessFactory();
@@ -54,10 +51,8 @@ class PdftkWrapper
 
     /**
      * Guesses the pdftk binary path based on the operating system.
-     *
-     * @return string
      */
-    public function guessBinary($operatingSystemString)
+    public function guessBinary($operatingSystemString): string
     {
         if (strtoupper(substr($operatingSystemString, 0, 3)) === 'WIN') {
             $binary = 'C:\\Program Files (x86)\\PDFtk Server\\bin\\pdftk.exe';
@@ -71,13 +66,9 @@ class PdftkWrapper
     /**
      * Set pdftk binary to use.
      *
-     * @param string $binary
-     *
-     * @return self
-     *
      * @throws FileNotFoundException
      */
-    public function setBinary($binary)
+    public function setBinary(string $binary): self
     {
         if (!file_exists($binary)) {
             throw new FileNotFoundException(sprintf('Binary "%s" not found', $binary));
@@ -91,23 +82,17 @@ class PdftkWrapper
     /**
      * Get current used pdftk binary.
      *
-     * @param bool $escaped shellescape binary
-     *
-     * @return string
+     * @param bool $escaped Whether the binary path should be shell escaped
      */
-    public function getBinary($escaped = true)
+    public function getBinary(bool $escaped = true): string
     {
         return $escaped ? escapeshellarg($this->pdftkBinary) : $this->pdftkBinary;
     }
 
     /**
      * Creates a (pdftk) process using the ProcessFactory.
-     *
-     * @param string $commandLine
-     *
-     * @return Process
      */
-    public function createProcess($commandLine)
+    public function createProcess(string $commandLine): Process
     {
         return $this->processFactory->createProcess($commandLine);
     }
@@ -115,13 +100,9 @@ class PdftkWrapper
     /**
      * Get data dump.
      *
-     * @param string $pdf
-     *
-     * @return string
-     *
      * @throws PdfException
      */
-    public function getPdfDataDump($pdf)
+    public function getPdfDataDump(string $pdf): string
     {
         if (!file_exists($pdf)) {
             throw new FileNotFoundException(sprintf('PDF "%s" not found', $pdf));
@@ -162,13 +143,13 @@ class PdftkWrapper
     /**
      * Update PDF data from dump.
      *
-     * @param string $pdf         input file
-     * @param string $data        dump data or filename of containing dump data
-     * @param string $outfile     output file (is input when null)
+     * @param string $pdf     input file
+     * @param string $data    dump data or filename of containing dump data
+     * @param string $outfile output file (is input when null)
      *
      * @throws PdfException
      */
-    public function updatePdfDataFromDump($pdf, $data, $outfile = null)
+    public function updatePdfDataFromDump(string $pdf, string $data, string $outfile = null): void
     {
         $temporaryOutFile = false;
 

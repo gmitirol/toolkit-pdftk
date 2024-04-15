@@ -51,7 +51,7 @@ class PageOrder
      *
      * @throws JoinException if the PDF join fails
      */
-    public function reorder($file, $order, $outfile = null)
+    public function reorder(string $file, array $order, string $outfile = null): void
     {
         $this->checkOrderPagesEqualNumberOfPdfPages($order, $file);
         $this->checkOrderHasCorrectPageNumbers($order);
@@ -107,7 +107,7 @@ class PageOrder
      *
      * @throws ReorderException
      */
-    private function checkOrderPagesEqualNumberOfPdfPages($order, $file)
+    private function checkOrderPagesEqualNumberOfPdfPages(array $order, string $file): void
     {
         $dump = $this->wrapper->getPdfDataDump($file);
         $matches = [];
@@ -126,7 +126,7 @@ class PageOrder
      *
      * @throws ReorderException
      */
-    private function checkOrderHasCorrectPageNumbers($order)
+    private function checkOrderHasCorrectPageNumbers(array $order): void
     {
         $expected = range(1, max($order));
         if (array_diff($order, $expected) !== [] || array_diff($expected, $order) !== []) {
