@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -179,7 +179,7 @@ class Pdftk
     /**
      * Returns the PDF page order changer.
      *
-     * @return Splitter
+     * @return PageOrder
      */
     public function getPageOrder()
     {
@@ -189,7 +189,7 @@ class Pdftk
     /**
      * Alias for getPageOrder().
      *
-     * @return Splitter
+     * @return PageOrder
      */
     public function order()
     {

@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @author Nikola Vrlazic <nikola.vrlazic@i-med.ac.at>
  * @license LGPL-3.0-only
