@@ -24,11 +24,40 @@ class EscaperTest extends TestCase
 
     public function testNoSupportedUtf8LocaleFound()
     {
+        if (false !== @setlocale(LC_CTYPE, 'XXX.UTF-8')) {
+            /**
+             * @see https://www.php.net/manual/en/function.setlocale.php
+             */
+            $msg = 'PHPs setlocale() should return false if the specified locale does not exist.' .
+                   'However, this is not the case on this system!';
+
+            $this->markTestSkipped($msg);
+        }
+
         setlocale(LC_CTYPE, 'C');
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No supported UTF-8 locale found!');
-        $escaper = new Escaper(['XXX.UTF-8']);
+        new Escaper(['XXX.UTF-8']);
+    }
+
+    public function testNoSupportedUtf8LocaleFoundButMisreported()
+    {
+        $locale = @setlocale(LC_CTYPE, 'XXX.UTF-8');
+        if (false === $locale) {
+            $this->assertFalse($locale);
+
+            /**
+             * PHPs setlocale() works as intended on this system, so just return.
+             * Marking the test as skipped would cause PHPUnit warnings, but the behaviour of setlocale is okay here.
+             *
+             * @see testNoSupportedUtf8LocaleFound()
+             */
+            return;
+        }
+
+        setlocale(LC_CTYPE, 'C');
+        new Escaper(['XXX.UTF-8']);
     }
 
     public function testEscapeshellargsAlreadyUtf8Locale()

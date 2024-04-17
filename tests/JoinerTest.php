@@ -15,16 +15,15 @@ namespace Gmi\Toolkit\Pdftk\Tests;
 use PHPUnit\Framework\TestCase;
 
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
 
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
+use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Joiner;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Sorter\FileSorterInterface;
 
 use ArrayObject;
-use Exception;
 use SplFileInfo;
 
 class JoinerTest extends TestCase
@@ -55,7 +54,7 @@ class JoinerTest extends TestCase
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->never())
-                    ->method('createProcess');
+                    ->method('join');
 
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
@@ -102,23 +101,13 @@ class JoinerTest extends TestCase
                    ->with([$mockSplFileInfo])
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
-        $exception = $this->getTestException();
-
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun')
-                    ->will($this->throwException($exception));
-        $mockProcess->expects($this->once())
-                    ->method('getOutput');
+        $exception = new PdfException('Error');
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/my/pdftk');
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    ->with('/my/pdftk \'' . $inputFolder . '/Sp185998.pdf\' cat output \'DummyOutput.pdf\'')
-                    ->willReturn($mockProcess);
+                    ->method('join')
+                    ->with([$inputFolder . '/Sp185998.pdf'], 'DummyOutput.pdf')
+                    ->will($this->throwException($exception));
 
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
@@ -160,30 +149,16 @@ class JoinerTest extends TestCase
                    ->with([$mockSplFileInfo])
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
-        $pdfErrorMessage = 'PDf error message';
-        $pdfOutputMessage = 'PDf output message';
+        $pdfErrorMessage = 'PDF error message';
+        $pdfOutputMessage = 'PDF output message';
 
-        $exception = $this->getTestException();
-
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun')
-                    ->will($this->throwException($exception));
-        $mockProcess->expects($this->once())
-                    ->method('getErrorOutput')
-                    ->willReturn($pdfErrorMessage);
-        $mockProcess->expects($this->once())
-                    ->method('getOutput')
-                    ->willReturn($pdfOutputMessage);
+        $exception = new PdfException('Error', 0, null, $pdfErrorMessage, $pdfOutputMessage);
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/my/pdftk');
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    ->with('/my/pdftk \'' . $inputFolder . '/Sp178945.pdf\' cat output \'DummyOutput.pdf\'')
-                    ->willReturn($mockProcess);
+                    ->method('join')
+                    ->with([$inputFolder . '/Sp178945.pdf'], 'DummyOutput.pdf')
+                    ->will($this->throwException($exception));
 
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
@@ -231,20 +206,10 @@ class JoinerTest extends TestCase
                    ->with([$mockSplFileInfo])
                    ->willReturn(new ArrayObject([$mockSplFileInfo]));
 
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun');
-        $mockProcess->expects($this->once())
-                    ->method('getOutput');
-
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/my/pdftk');
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    ->with('/my/pdftk \'' . $inputFolder . '/Sp123456.pdf\' cat output \'DummyJoin.pdf\'')
-                    ->willReturn($mockProcess);
+                    ->method('join')
+                    ->with([$inputFolder . '/Sp123456.pdf'], 'DummyJoin.pdf');
 
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
@@ -295,22 +260,10 @@ class JoinerTest extends TestCase
                    ->with([$mockSplFileInfo3, $mockSplFileInfo2, $mockSplFileInfo1])
                    ->willReturn(new ArrayObject([$mockSplFileInfo1, $mockSplFileInfo2, $mockSplFileInfo3]));
 
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun');
-        $mockProcess->expects($this->once())
-                    ->method('getOutput');
-
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/my/pdftk');
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    // @codingStandardsIgnoreStart
-                    ->with('/my/pdftk \'' . $filePath1 . '\' \'' . $filePath2 . '\' \'' . $filePath3 .'\' cat output \'DummyJoin2Files.pdf\'')
-                    // @codingStandardsIgnoreEnd
-                    ->willReturn($mockProcess);
+                    ->method('join')
+                    ->with([$filePath1, $filePath2, $filePath3], 'DummyJoin2Files.pdf');
 
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
@@ -361,30 +314,13 @@ class JoinerTest extends TestCase
                    ->with([$mockSplFileInfo3, $mockSplFileInfo2, $mockSplFileInfo1])
                    ->willReturn(new ArrayObject([$mockSplFileInfo1, $mockSplFileInfo2, $mockSplFileInfo3]));
 
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun');
-        $mockProcess->expects($this->once())
-                    ->method('getOutput');
-
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/my/pdftk');
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    // @codingStandardsIgnoreStart
-                    ->with('/my/pdftk \'' . $filePath1 . '\' \'' . $filePath2 . '\' \'' .$filePath3. '\' cat output \'DummyJoin2Files.pdf\'')
-                    // @codingStandardsIgnoreEnd
-                    ->willReturn($mockProcess);
+                    ->method('join')
+                    ->with([$filePath1, $filePath2, $filePath3], 'DummyJoin2Files.pdf');
 
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
         $joiner->joinByPattern($inputFolder, $pattern, $output);
-    }
-
-    private function getTestException()
-    {
-        return new Exception('pdftk exception message');
     }
 }

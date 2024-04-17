@@ -48,7 +48,7 @@ class Pdftk
     private $pageOrder;
 
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
@@ -57,11 +57,11 @@ class Pdftk
      *
      * @throws PdfException
      */
-    public function __construct($options = [], PdftkWrapper $wrapper = null)
+    public function __construct($options = [], WrapperInterface $wrapper = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
 
-        if (isset($options['binary'])) {
+        if (isset($options['binary']) && $this->wrapper instanceof BinaryPathAwareInterface) {
             $this->wrapper->setBinary($options['binary']);
         }
 
@@ -185,16 +185,14 @@ class Pdftk
      */
     public function import(string $infile): self
     {
-        $dump = $this->wrapper->getPdfDataDump($infile);
-
         $this->pages->clear();
         $this->bookmarks->clear();
         $this->metadata->clear();
 
-        $this->pages->importFromDump($dump);
+        $this->pages->import($infile);
         $this->bookmarks->setMaxpage(count($this->pages->all()));
-        $this->bookmarks->importFromDump($dump);
-        $this->metadata->importFromDump($dump);
+        $this->bookmarks->import($infile);
+        $this->metadata->import($infile);
 
         return $this;
     }

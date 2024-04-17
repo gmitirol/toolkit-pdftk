@@ -34,16 +34,14 @@ class Metadata
     private $metadata = [];
 
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
     /**
      * Constructor.
-     *
-     * @param PdftkWrapper $wrapper
      */
-    public function __construct(PdftkWrapper $wrapper = null)
+    public function __construct(WrapperInterface $wrapper = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
     }
@@ -141,55 +139,21 @@ class Metadata
      */
     public function apply(string $infile, string $outfile = null): self
     {
-        $metaBlock = '';
-        foreach ($this->metadata as $k => $v) {
-            $metaBlock .= $this->buildInfoBlock($k, $v);
-        }
-        $this->wrapper->updatePdfDataFromDump($infile, $metaBlock, $outfile);
+        $this->wrapper->applyMetadata($this, $infile, $outfile);
 
         return $this;
     }
 
     /**
      * Imports metadata from a PDF file.
+     *
+     * @throws PdfException
      */
     public function import(string $infile): self
     {
-        $dump = $this->wrapper->getPdfDataDump($infile);
-        $this->importFromDump($dump);
+        $this->wrapper->importMetadata($this, $infile);
 
         return $this;
-    }
-
-    /**
-     * Imports PDF metadata from a pdftk dump.
-     */
-    public function importFromDump(string $dump): self
-    {
-        $matches = [];
-        $regex = '/InfoBegin??\r?\nInfoKey: (?<key>.*)??\r?\nInfoValue: (?<value>.*)??\r?\n/';
-        preg_match_all($regex, $dump, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $meta) {
-            $this->set($meta['key'], $meta['value']);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Builds an InfoBlock string.
-     *
-     * @throws PdftkException
-     */
-    private function buildInfoBlock(string $key, string $value): string
-    {
-        $this->checkKey($key);
-
-        return
-            'InfoBegin' . PHP_EOL .
-            'InfoKey: ' . $key . PHP_EOL .
-            'InfoValue: ' . (string) $value . PHP_EOL;
     }
 
     /**

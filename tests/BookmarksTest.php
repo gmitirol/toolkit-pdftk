@@ -187,6 +187,9 @@ class BookmarksTest extends TestCase
         $this->assertSame([], $bm->all());
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testOutputFileNotFound()
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
@@ -196,6 +199,9 @@ class BookmarksTest extends TestCase
         $bm->apply($file);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testFileSetGet()
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
@@ -244,6 +250,9 @@ class BookmarksTest extends TestCase
         unlink($target);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImportNotFound()
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
@@ -253,6 +262,9 @@ class BookmarksTest extends TestCase
         $bm->import($file);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImport()
     {
         $file = __DIR__ . '/Fixtures/example.pdf';

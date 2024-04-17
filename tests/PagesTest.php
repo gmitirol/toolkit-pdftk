@@ -25,6 +25,9 @@ class PagesTest extends TestCase
     const A3_HEIGHT = 420;
     const A3_WIDTH = 297;
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImportNotFound()
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
@@ -34,6 +37,9 @@ class PagesTest extends TestCase
         $p->import($file);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImportA4()
     {
         $file = __DIR__ . '/Fixtures/a4.pdf';
@@ -50,6 +56,9 @@ class PagesTest extends TestCase
         $this->assertSame(1, $page1->getPageNumber());
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImport()
     {
         $file = __DIR__ . '/Fixtures/pages.pdf';
@@ -90,6 +99,9 @@ class PagesTest extends TestCase
         $this->assertSame(0, $page6->getRotation());
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImportMixedHugePage()
     {
         $file = __DIR__ . '/Fixtures/mixed-hugepage.pdf';

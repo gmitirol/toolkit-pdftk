@@ -35,16 +35,14 @@ class Bookmarks
     private $maxpage = -1;
 
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
     /**
      * Constructor.
-     *
-     * @param PdftkWrapper $wrapper
      */
-    public function __construct(PdftkWrapper $wrapper = null)
+    public function __construct(WrapperInterface $wrapper = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
     }
@@ -128,45 +126,24 @@ class Bookmarks
 
     /**
      * Apply bookmarks to PDF file.
+     *
+     * @throws PdfException
      */
     public function apply(string $infile, string $outfile = null): self
     {
-        $this->wrapper->updatePdfDataFromDump($infile, $this->buildBookmarksBlock(), $outfile);
+        $this->wrapper->applyBookmarks($this, $infile, $outfile);
 
         return $this;
     }
 
     /**
      * Imports bookmarks from a PDF file.
+     *
+     * @throws PdfException
      */
     public function import(string $infile): self
     {
-        $dump = $this->wrapper->getPdfDataDump($infile);
-        $this->importFromDump($dump);
-
-        return $this;
-    }
-
-    /**
-     * Imports bookmarks from a pdftk dump.
-     */
-    public function importFromDump(string $dump): self
-    {
-        $matches = [];
-        $regex = '/BookmarkBegin\nBookmarkTitle: (?<title>.+)\n' .
-                 'BookmarkLevel: (?<level>[0-9]+)\nBookmarkPageNumber: (?<page>[0-9]+)/';
-        preg_match_all($regex, $dump, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $bm) {
-            $bookmark = new Bookmark();
-            $bookmark
-                ->setTitle($bm['title'])
-                ->setPageNumber((int) $bm['page'])
-                ->setLevel((int) $bm['level'])
-            ;
-
-            $this->add($bookmark);
-        }
+        $this->wrapper->importBookmarks($this, $infile);
 
         return $this;
     }
@@ -181,32 +158,6 @@ class Bookmarks
         $this->maxpage = $maxpage;
 
         return $this;
-    }
-
-    /**
-     * Builds an Bookmark string for all bookmarks.
-     */
-    private function buildBookmarksBlock(): string
-    {
-        $result = '';
-
-        foreach ($this->bookmarks as $bookmark) {
-            $result .= $this->buildBookmarkBlock($bookmark);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Builds an Bookmark string for a single bookmark.
-     */
-    private function buildBookmarkBlock(Bookmark $bookmark): string
-    {
-        return
-            'BookmarkBegin' . PHP_EOL .
-            'BookmarkTitle: ' . $bookmark->getTitle() . PHP_EOL .
-            'BookmarkLevel: ' . $bookmark->getLevel() . PHP_EOL .
-            'BookmarkPageNumber: ' . $bookmark->getPageNumber() . PHP_EOL;
     }
 
     /**

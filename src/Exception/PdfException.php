@@ -32,15 +32,14 @@ class PdfException extends Exception
 
     /**
      * Constructor.
-     *
-     * @param string    $message
-     * @param int       $code
-     * @param Exception $previous
-     * @param string    $pdfError
-     * @param string    $pdfOutput
      */
-    public function __construct($message, $code = 0, Exception $previous = null, $pdfError = null, $pdfOutput = null)
-    {
+    public function __construct(
+        string $message,
+        int $code = 0,
+        Exception $previous = null,
+        string $pdfError = null,
+        string $pdfOutput = null
+    ) {
         parent::__construct($message, $code, $previous);
 
         $this->pdfError = $pdfError;

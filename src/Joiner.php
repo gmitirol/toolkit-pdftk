@@ -14,14 +14,13 @@
 namespace Gmi\Toolkit\Pdftk;
 
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
 
-use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
+use Gmi\Toolkit\Pdftk\Exception\JoinException;
+use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Sorter\FileSorterInterface;
 use Gmi\Toolkit\Sorter\NaturalFileSorter;
 
-use Exception;
 use SplFileInfo;
 
 /**
@@ -45,15 +44,18 @@ class Joiner
     private $sorter;
 
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
     /**
      * Constructor.
      */
-    public function __construct(PdftkWrapper $wrapper = null, Finder $finder = null, FileSorterInterface $sorter = null)
-    {
+    public function __construct(
+        WrapperInterface $wrapper = null,
+        Finder $finder = null,
+        FileSorterInterface $sorter = null
+    ) {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
         $this->finder = $finder ?: new Finder();
         $this->sorter = $sorter ?: new NaturalFileSorter();
@@ -97,31 +99,20 @@ class Joiner
     {
         $filePaths = [];
         foreach ($files as $file) {
-            $filePaths[] = escapeshellarg($file->getPathname());
+            $filePaths[] = $file->getPathname();
         }
 
-        $fileList = implode(' ', $filePaths);
-
-        $commandLine = sprintf('%s %s cat output %s', $this->wrapper->getBinary(), $fileList, escapeshellarg($output));
-
-        /**
-         * @var Process
-         */
-        $process = $this->wrapper->createProcess($commandLine);
-
         try {
-            $process->mustRun();
-        } catch (Exception $e) {
+            $this->wrapper->join($filePaths, $output);
+        } catch (PdfException $e) {
             throw new JoinException(
                 sprintf('Failed to join PDF "%s"! Error: %s', $output, $e->getMessage()),
                 0,
                 $e,
-                $process->getErrorOutput(),
-                $process->getOutput()
+                $e->getPdfError(),
+                $e->getPdfOutput()
             );
         }
-
-        $process->getOutput();
     }
 
     /**

@@ -112,6 +112,9 @@ class PdftkMetadataTest extends TestCase
         );
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testOutputFileNotFound()
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
@@ -122,6 +125,9 @@ class PdftkMetadataTest extends TestCase
                 ->apply($file);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testFileSetGet()
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
@@ -143,6 +149,9 @@ class PdftkMetadataTest extends TestCase
         unlink($target);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testFileSetGetFilenameWithSpaces()
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
@@ -164,6 +173,9 @@ class PdftkMetadataTest extends TestCase
         unlink($target);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testFileSetGetSameFile()
     {
         $source = __DIR__ . '/Fixtures/example.pdf';
@@ -188,6 +200,9 @@ class PdftkMetadataTest extends TestCase
         unlink($testPdf);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImport()
     {
         $source = __DIR__ . '/Fixtures/example.pdf';

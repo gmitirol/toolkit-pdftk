@@ -12,9 +12,8 @@
 
 namespace Gmi\Toolkit\Pdftk;
 
+use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Exception\SplitException;
-
-use Exception;
 
 /**
  * Splits PDF files.
@@ -22,16 +21,14 @@ use Exception;
 class Splitter
 {
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
     /**
      * Constructor.
-     *
-     * @param PdftkWrapper $wrapper
      */
-    public function __construct(PdftkWrapper $wrapper = null)
+    public function __construct(WrapperInterface $wrapper = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
     }
@@ -49,54 +46,16 @@ class Splitter
      */
     public function split(string $inputFile, array $mapping, string $outputFolder = null): void
     {
-        $commandLines = $this->buildCommandLines($inputFile, $mapping, $outputFolder);
-
-        foreach ($commandLines as $commandLine) {
-            $process = $this->wrapper->createProcess($commandLine);
-
-            try {
-                $process->mustRun();
-            } catch (Exception $e) {
-                throw new SplitException(
-                    sprintf('Failed to split PDF "%s"! Error: %s', $inputFile, $e->getMessage()),
-                    0,
-                    $e,
-                    $process->getErrorOutput(),
-                    $process->getOutput()
-                );
-            }
-        }
-    }
-
-    /**
-     * Builds the pdftk command lines for splitting.
-     *
-     * @param string $inputFile
-     * @param array  $mapping
-     * @param string $outputFolder
-     *
-     * @return string[]
-     */
-    private function buildCommandLines(string $inputFile, array $mapping, string $outputFolder = null): array
-    {
-        $commandLines = [];
-
-        foreach ($mapping as $filename => $pages) {
-            if ($outputFolder) {
-                $target = sprintf('%s/%s', $outputFolder, $filename);
-            } else {
-                $target = $filename;
-            }
-
-            $commandLines[] = sprintf(
-                '%s %s cat %s output %s',
-                $this->wrapper->getBinary(),
-                escapeshellarg($inputFile),
-                implode(' ', $pages),
-                escapeshellarg($target)
+        try {
+            $this->wrapper->split($inputFile, $mapping, $outputFolder);
+        } catch (PdfException $e) {
+            throw new SplitException(
+                sprintf('Failed to split PDF "%s"! Error: %s', $inputFile, $e->getMessage()),
+                0,
+                $e,
+                $e->getPdfError(),
+                $e->getPdfOutput()
             );
         }
-
-        return $commandLines;
     }
 }

@@ -51,6 +51,9 @@ class PdftkTest extends TestCase
         new Pdftk(['binary' => $binary], $mockWrapper);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImport()
     {
         $file = __DIR__ . '/Fixtures/example2.pdf';
@@ -80,6 +83,9 @@ class PdftkTest extends TestCase
         $this->assertSame('Example Creator', $pdftk->metadata()->get('Creator'));
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testApply()
     {
         $file = __DIR__ . '/Fixtures/example2.pdf';
