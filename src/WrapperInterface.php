@@ -40,7 +40,7 @@ interface WrapperInterface
     /**
      * Reorders PDF pages based on a $order array into an $outfile.
      */
-    public function reorder(string $infile, array $order, string $outfile);
+    public function reorder(string $infile, array $order, string $outfile = null);
 
     // ## Bookmark methods
 

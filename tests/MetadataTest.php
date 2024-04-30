@@ -18,6 +18,8 @@ use PHPUnit\Framework\TestCase;
 use Gmi\Toolkit\Pdftk\Metadata;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\PdfTk\Exception\PdfException;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PdftkMetadataTest extends TestCase
 {
@@ -114,6 +116,7 @@ class PdftkMetadataTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @todo Add data provider when pdfcpu supports setting metadata
      */
     public function testOutputFileNotFound()
     {
@@ -127,6 +130,7 @@ class PdftkMetadataTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @todo Add data provider when pdfcpu supports setting metadata
      */
     public function testFileSetGet()
     {
@@ -151,6 +155,7 @@ class PdftkMetadataTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @todo Add data provider when pdfcpu supports setting metadata
      */
     public function testFileSetGetFilenameWithSpaces()
     {
@@ -175,6 +180,7 @@ class PdftkMetadataTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @todo Add data provider when pdfcpu supports setting metadata
      */
     public function testFileSetGetSameFile()
     {
@@ -202,15 +208,24 @@ class PdftkMetadataTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testImport()
+    public function testImport($wrapper)
     {
         $source = __DIR__ . '/Fixtures/example.pdf';
 
-        $meta = new Metadata();
+        $meta = new Metadata($wrapper);
         $meta->import($source);
         $this->assertSame('author', $meta->get('Author'));
         $this->assertSame('creator', $meta->get('Creator'));
         $this->assertSame('producer', $meta->get('Producer'));
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }

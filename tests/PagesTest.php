@@ -16,6 +16,8 @@ use PHPUnit\Framework\TestCase;
 
 use Gmi\Toolkit\Pdftk\Pages;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PagesTest extends TestCase
 {
@@ -27,23 +29,25 @@ class PagesTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testImportNotFound()
+    public function testImportNotFound($wrapper)
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
 
         $this->expectException(FileNotFoundException::Class);
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
     }
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testImportA4()
+    public function testImportA4($wrapper)
     {
         $file = __DIR__ . '/Fixtures/a4.pdf';
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
 
         $pages = $p->all();
@@ -58,11 +62,12 @@ class PagesTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testImport()
+    public function testImport($wrapper)
     {
         $file = __DIR__ . '/Fixtures/pages.pdf';
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
 
         $pages = $p->all();
@@ -101,11 +106,12 @@ class PagesTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testImportMixedHugePage()
+    public function testImportMixedHugePage($wrapper)
     {
         $file = __DIR__ . '/Fixtures/mixed-hugepage.pdf';
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
 
         $pages = $p->all();
@@ -122,5 +128,13 @@ class PagesTest extends TestCase
         $this->assertSame(841, $page2->getHeightMm());
         $this->assertSame(0, $page2->getRotation());
         $this->assertSame(2, $page2->getPageNumber());
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }

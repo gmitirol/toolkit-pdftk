@@ -19,6 +19,8 @@ use Gmi\Toolkit\Pdftk\Bookmark;
 use Gmi\Toolkit\Pdftk\Bookmarks;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class BookmarksTest extends TestCase
 {
@@ -189,23 +191,25 @@ class BookmarksTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testOutputFileNotFound()
+    public function testOutputFileNotFound($wrapper)
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
         $this->expectException(FileNotFoundException::Class);
 
-        $bm = new Bookmarks();
+        $bm = new Bookmarks($wrapper);
         $bm->apply($file);
     }
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testFileSetGet()
+    public function testFileSetGet($wrapper)
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
-        $target = tempnam(sys_get_temp_dir(), 'pdf');
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
         $bookmark1 = new Bookmark();
         $bookmark1
@@ -226,13 +230,13 @@ class BookmarksTest extends TestCase
             ->setLevel(2)
         ;
 
-        $bmSet = new Bookmarks();
+        $bmSet = new Bookmarks($wrapper);
         $bmSet->add($bookmark1)
               ->add($bookmark2)
               ->add($bookmark3)
               ->apply($source, $target);
 
-        $bmGet = new Bookmarks();
+        $bmGet = new Bookmarks($wrapper);
         $bmGet->import($target);
 
         $this->assertSame('1. Example Bookmark', $bmGet->all()[0]->getTitle());
@@ -252,23 +256,127 @@ class BookmarksTest extends TestCase
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testImportNotFound()
+    public function testFileSetGetNestedBookmarks($wrapper)
+    {
+        $source = __DIR__ . '/Fixtures/three-pages.pdf';
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
+
+        $bookmark1 = new Bookmark();
+        $bookmark1
+            ->setTitle('1. Lorem Ipsum')
+            ->setPageNumber(1)
+            // default level 1 doesn't need to be set explicitly
+        ;
+        $bookmark2 = new Bookmark();
+        $bookmark2
+            ->setTitle('1.1. Sed diam nonumy')
+            ->setPageNumber(1)
+            ->setLevel(2)
+        ;
+        $bookmark3 = new Bookmark();
+        $bookmark3
+            ->setTitle('1.1.1. Et justo duo dolores')
+            ->setPageNumber(2)
+            ->setLevel(3)
+        ;
+
+        $bookmark4 = new Bookmark();
+        $bookmark4
+            ->setTitle('1.1.2. Ullamcorper suscipit')
+            ->setPageNumber(2)
+            ->setLevel(3)
+        ;
+        $bookmark5 = new Bookmark();
+        $bookmark5
+            ->setTitle('1.2. Magna no rebum')
+            ->setPageNumber(3)
+            ->setLevel(2)
+        ;
+        $bookmark6 = new Bookmark();
+        $bookmark6
+            ->setTitle('2. Nam liber tempor')
+            ->setPageNumber(3)
+        ;
+
+        $bmSet = new Bookmarks($wrapper);
+        $bmSet->add($bookmark1)
+              ->add($bookmark2)
+              ->add($bookmark3)
+              ->add($bookmark4)
+              ->add($bookmark5)
+              ->add($bookmark6)
+              ->apply($source, $target);
+
+        $bmGet = new Bookmarks($wrapper);
+        $bmGet->import($target);
+
+        $this->assertCount(6, $bmGet->all());
+
+        $this->assertSame('1. Lorem Ipsum', $bmGet->all()[0]->getTitle());
+        $this->assertSame(1, $bmGet->all()[0]->getPageNumber());
+        $this->assertSame(1, $bmGet->all()[0]->getLevel());
+
+        $this->assertSame('1.1. Sed diam nonumy', $bmGet->all()[1]->getTitle());
+        $this->assertSame(1, $bmGet->all()[1]->getPageNumber());
+        $this->assertSame(2, $bmGet->all()[1]->getLevel());
+
+        $this->assertSame('1.1.1. Et justo duo dolores', $bmGet->all()[2]->getTitle());
+        $this->assertSame(2, $bmGet->all()[2]->getPageNumber());
+        $this->assertSame(3, $bmGet->all()[2]->getLevel());
+
+        $this->assertSame('1.1.2. Ullamcorper suscipit', $bmGet->all()[3]->getTitle());
+        $this->assertSame(2, $bmGet->all()[3]->getPageNumber());
+        $this->assertSame(3, $bmGet->all()[3]->getLevel());
+
+        $this->assertSame('1.2. Magna no rebum', $bmGet->all()[4]->getTitle());
+        $this->assertSame(3, $bmGet->all()[4]->getPageNumber());
+        $this->assertSame(2, $bmGet->all()[4]->getLevel());
+
+        $this->assertSame('2. Nam liber tempor', $bmGet->all()[5]->getTitle());
+        $this->assertSame(3, $bmGet->all()[5]->getPageNumber());
+        $this->assertSame(1, $bmGet->all()[5]->getLevel());
+
+        unlink($target);
+    }
+
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImportNotFound($wrapper)
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
 
         $this->expectException(FileNotFoundException::Class);
-        $bm = new Bookmarks();
+        $bm = new Bookmarks($wrapper);
         $bm->import($file);
     }
 
     /**
      * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
      */
-    public function testImport()
+    public function testImportFileWithoutBookmarks($wrapper)
+    {
+        $file = __DIR__ . '/Fixtures/empty.pdf';
+        $bm = new Bookmarks($wrapper);
+        $bm->import($file);
+
+        $bookmarks = $bm->all();
+        $this->assertSame(0, count($bookmarks));
+        $this->assertSame([], $bm->all());
+    }
+
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImport($wrapper)
     {
         $file = __DIR__ . '/Fixtures/example.pdf';
-        $bm = new Bookmarks();
+        $bm = new Bookmarks($wrapper);
         $bm->import($file);
 
         $bookmarks = $bm->all();
@@ -288,5 +396,87 @@ class BookmarksTest extends TestCase
         $this->assertSame('Page 3 - Level 2', $bookmark3->getTitle());
         $this->assertSame(3, $bookmark3->getPageNumber());
         $this->assertSame(2, $bookmark3->getLevel());
+    }
+
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImportNestedBookmarks($wrapper)
+    {
+        $file = __DIR__ . '/Fixtures/nested-bookmarks.pdf';
+        $bm = new Bookmarks($wrapper);
+        $bm->import($file);
+
+        $bookmarks = $bm->all();
+        $this->assertSame(12, count($bookmarks));
+        $bookmark1 = $bookmarks[0];
+        $bookmark2 = $bookmarks[1];
+        $bookmark3 = $bookmarks[2];
+        $bookmark4 = $bookmarks[3];
+        $bookmark5 = $bookmarks[4];
+        $bookmark6 = $bookmarks[5];
+        $bookmark7 = $bookmarks[6];
+        $bookmark8 = $bookmarks[7];
+        $bookmark9 = $bookmarks[8];
+        $bookmark10 = $bookmarks[9];
+        $bookmark11 = $bookmarks[10];
+        $bookmark12 = $bookmarks[11];
+
+        $this->assertSame('1 Lorem ipsum dolor sit amet', $bookmark1->getTitle());
+        $this->assertSame(1, $bookmark1->getPageNumber());
+        $this->assertSame(1, $bookmark1->getLevel());
+
+        $this->assertSame('2 Duis autem', $bookmark2->getTitle());
+        $this->assertSame(1, $bookmark2->getPageNumber());
+        $this->assertSame(1, $bookmark2->getLevel());
+
+        $this->assertSame('2.1 Ut wisi', $bookmark3->getTitle());
+        $this->assertSame(1, $bookmark3->getPageNumber());
+        $this->assertSame(2, $bookmark3->getLevel());
+
+        $this->assertSame('2.1.1 Nam liber', $bookmark4->getTitle());
+        $this->assertSame(1, $bookmark4->getPageNumber());
+        $this->assertSame(3, $bookmark4->getLevel());
+
+        $this->assertSame('2.1.2 Duis autem', $bookmark5->getTitle());
+        $this->assertSame(2, $bookmark5->getPageNumber());
+        $this->assertSame(3, $bookmark5->getLevel());
+
+        $this->assertSame('2.1.3 At vero eos', $bookmark6->getTitle());
+        $this->assertSame(2, $bookmark6->getPageNumber());
+        $this->assertSame(3, $bookmark6->getLevel());
+
+        $this->assertSame('2.2 At accusam', $bookmark7->getTitle());
+        $this->assertSame(2, $bookmark7->getPageNumber());
+        $this->assertSame(2, $bookmark7->getLevel());
+
+        $this->assertSame('3 Consetetur sadipscing elitr', $bookmark8->getTitle());
+        $this->assertSame(2, $bookmark8->getPageNumber());
+        $this->assertSame(1, $bookmark8->getLevel());
+
+        $this->assertSame('3.1 Duis autem vel eum', $bookmark9->getTitle());
+        $this->assertSame(2, $bookmark9->getPageNumber());
+        $this->assertSame(2, $bookmark9->getLevel());
+
+        $this->assertSame('3.1.1 Ut wisi enim', $bookmark10->getTitle());
+        $this->assertSame(3, $bookmark10->getPageNumber());
+        $this->assertSame(3, $bookmark10->getLevel());
+
+        $this->assertSame('3.1.2 Duis autem vel eum', $bookmark11->getTitle());
+        $this->assertSame(3, $bookmark11->getPageNumber());
+        $this->assertSame(3, $bookmark11->getLevel());
+
+        $this->assertSame('4 Consetetur sadipscing elitr', $bookmark12->getTitle());
+        $this->assertSame(3, $bookmark12->getPageNumber());
+        $this->assertSame(1, $bookmark12->getLevel());
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }

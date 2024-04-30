@@ -3,7 +3,6 @@
  * PDFtk wrapper reorder test
  *
  * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
- * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -16,13 +15,13 @@ use Symfony\Component\Process\Process;
 
 use PHPUnit\Framework\TestCase;
 
-use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
-class PdftkReorderTest extends TestCase
+class PdfcpuReorderTest extends TestCase
 {
     public function testReorderException()
     {
@@ -44,10 +43,10 @@ class PdftkReorderTest extends TestCase
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
                            ->method('createProcess')
-                           ->with("'$binary' '/path/to/input' cat 3 1 2 output '/path/to/output.pdf'")
+                           ->with("'$binary' collect -pages 3,1,2 '/path/to/input' '/path/to/output.pdf'")
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdftkWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
 
         try {
             $wrapper->reorder('/path/to/input', [3, 1, 2], '/path/to/output.pdf');
@@ -71,10 +70,10 @@ class PdftkReorderTest extends TestCase
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
                            ->method('createProcess')
-                           ->with("'$binary' '/path/to/input' cat 3 1 2 output '/path/to/output.pdf'")
+                           ->with("'$binary' collect -pages 3,1,2 '/path/to/input' '/path/to/output.pdf'")
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdftkWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
 
         $wrapper->reorder('/path/to/input', [3, 1, 2], '/path/to/output.pdf');
     }

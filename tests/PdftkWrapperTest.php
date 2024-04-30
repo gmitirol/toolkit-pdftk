@@ -65,7 +65,7 @@ class PdftkWrapperTest extends TestCase
         $binary = __DIR__ . '/Fixtures/missing.sh';
 
         $this->expectException(FileNotFoundException::Class);
-        $pdftk = new PdftkWrapper($binary);
+        new PdftkWrapper($binary);
     }
 
     public function testGetPdfDataDumpException()

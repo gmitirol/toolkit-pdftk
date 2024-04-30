@@ -20,6 +20,8 @@ use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Joiner;
+use Gmi\Toolkit\Pdftk\Pages;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Sorter\FileSorterInterface;
 
@@ -322,5 +324,36 @@ class JoinerTest extends TestCase
         $joiner = new Joiner($mockWrapper, $mockFinder, $mockSorter);
 
         $joiner->joinByPattern($inputFolder, $pattern, $output);
+    }
+
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testJoinRealPdfs($wrapper)
+    {
+        $file1 = __DIR__ . '/Fixtures/example2.pdf';
+        $file2 = __DIR__ . '/Fixtures/example.pdf';
+
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
+
+        $wrapper->join([$file1, $file2], $target);
+
+        $this->assertFileExists($target);
+
+        $pages = new Pages();
+        $wrapper->importPages($pages, $target);
+
+        $this->assertSame(4, count($pages->all()));
+
+        unlink($target);
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }

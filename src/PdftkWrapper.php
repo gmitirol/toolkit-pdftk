@@ -116,7 +116,7 @@ class PdftkWrapper implements WrapperInterface, BinaryPathAwareInterface
     /**
      * {@inheritDoc}
      */
-    public function reorder(string $infile, array $order, string $outfile): void
+    public function reorder(string $infile, array $order, string $outfile = null): void
     {
         $pageNumbers = implode(' ', $order);
 
@@ -129,10 +129,9 @@ class PdftkWrapper implements WrapperInterface, BinaryPathAwareInterface
 
         $esc = $this->escaper;
 
-        $binary = $this->getBinary();
         $commandLine = sprintf(
             '%s %s cat %s output %s',
-            $binary,
+            $this->getBinary(),
             $esc->shellArg($infile),
             $pageNumbers,
             $esc->shellArg($outfile)

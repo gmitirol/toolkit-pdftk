@@ -14,8 +14,12 @@ namespace Gmi\Toolkit\Pdftk\Tests;
 
 use PHPUnit\Framework\TestCase;
 
+use Gmi\Toolkit\Pdftk\Constant\PageOrientations;
+use Gmi\Toolkit\Pdftk\Constant\PageSizes;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Exception\SplitException;
+use Gmi\Toolkit\Pdftk\Pages;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Pdftk\Splitter;
 
@@ -90,5 +94,70 @@ class PdfSplitterTest extends TestCase
         $splitter = new Splitter($mockWrapper);
 
         $splitter->split($inputFile, $mapping, $outputFolder);
+    }
+
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testSplitRealPdf($wrapper)
+    {
+        $file = __DIR__ . '/Fixtures/pages.pdf';
+
+        $targetDir = sys_get_temp_dir() . uniqid('/pdf-split', true);
+        mkdir($targetDir);
+
+        $splitMapping = ['a4-variants.pdf' => [1, 2, 3], 'a3-variants.pdf' => [4, 5, 6]];
+
+        $wrapper->split($file, $splitMapping, $targetDir);
+
+        // verify the page info to ensure the pages are split correctly
+        $pagesPdf1 = new Pages();
+        $pagesPdf2 = new Pages();
+        $wrapper->importPages($pagesPdf1, $targetDir . '/a4-variants.pdf');
+        $wrapper->importPages($pagesPdf2, $targetDir . '/a3-variants.pdf');
+
+        $pagesA4 = $pagesPdf1->all();
+        $this->assertSame(3, count($pagesA4));
+
+        $this->assertSame(PageSizes::A4_HEIGHT, $pagesA4[0]->getHeightMm());
+        $this->assertSame(PageSizes::A4_WIDTH, $pagesA4[0]->getWidthMm());
+        $this->assertSame(PageOrientations::UP, $pagesA4[0]->getRotation());
+
+        $this->assertSame(PageSizes::A4_HEIGHT, $pagesA4[1]->getHeightMm());
+        $this->assertSame(PageSizes::A4_WIDTH, $pagesA4[1]->getWidthMm());
+        $this->assertSame(PageOrientations::LEFT, $pagesA4[1]->getRotation());
+
+        $this->assertSame(PageSizes::A4_WIDTH, $pagesA4[2]->getHeightMm());
+        $this->assertSame(PageSizes::A4_HEIGHT, $pagesA4[2]->getWidthMm());
+        $this->assertSame(PageOrientations::UP, $pagesA4[2]->getRotation());
+
+        $pagesA3 = $pagesPdf2->all();
+        $this->assertSame(3, count($pagesA3));
+
+        $this->assertSame(PageSizes::A3_HEIGHT, $pagesA3[0]->getHeightMm());
+        $this->assertSame(PageSizes::A3_WIDTH, $pagesA3[0]->getWidthMm());
+        $this->assertSame(PageOrientations::UP, $pagesA3[0]->getRotation());
+
+        $this->assertSame(PageSizes::A3_HEIGHT, $pagesA3[1]->getHeightMm());
+        $this->assertSame(PageSizes::A3_WIDTH, $pagesA3[1]->getWidthMm());
+        $this->assertSame(PageOrientations::RIGHT, $pagesA3[1]->getRotation());
+
+        $this->assertSame(PageSizes::A3_WIDTH, $pagesA3[2]->getHeightMm());
+        $this->assertSame(PageSizes::A3_HEIGHT, $pagesA3[2]->getWidthMm());
+        $this->assertSame(PageOrientations::UP, $pagesA3[2]->getRotation());
+
+        foreach (array_keys($splitMapping) as $file) {
+            unlink($targetDir . '/' . $file);
+        }
+        rmdir($targetDir);
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }
