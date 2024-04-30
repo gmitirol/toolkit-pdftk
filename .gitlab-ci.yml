@@ -1,5 +1,27 @@
 stages:
+  - build
   - test
+
+build_pdfcpu:
+  image: debian:12-slim
+  stage: build
+  script:
+    - apt update
+    - apt install -y wget git
+    - cd /
+    - wget 'https://go.dev/dl/go1.22.1.linux-amd64.tar.gz'
+    - tar xzf go1.22.1.linux-amd64.tar.gz
+    - cd /root
+    - git clone https://github.com/pdfcpu/pdfcpu
+    - cd pdfcpu/cmd/pdfcpu
+    - /go/bin/go install
+    - /root/go/bin/pdfcpu version
+    - cp /root/go/bin/pdfcpu $CI_PROJECT_DIR/
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/pdfcpu
+  tags:
+      - shared
 
 .test_template:
   stage: test
@@ -16,6 +38,7 @@ stages:
   variables:
     COMPOSER_HOME: "$CI_PROJECT_DIR/build/.composer"
   script:
+    - cp $CI_PROJECT_DIR/pdfcpu /usr/bin/pdfcpu
     - apk add --no-cache --update pdftk
     - php-ext.sh enable 'xdebug'
     - composer install --no-progress
