@@ -262,7 +262,7 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
             throw $exception;
         }
 
-        $this->importBookmarksFromJson($bookmarks, @file_get_contents($tempBookmarksFile) ?? '');
+        $this->importBookmarksFromJson($bookmarks, @file_get_contents($tempBookmarksFile) ?: '');
 
         @unlink($tempBookmarksFile);
 
@@ -459,10 +459,11 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
         $bookmarksArray = [];
 
         $b = $bookmarks->all();
+        $bookmarksCount = count($b);
 
-        $indexParent = $prevIndexParent = null;
+        $indexParent = null;
 
-        for ($i = 0; $i < count($b); $i++) {
+        for ($i = 0; $i < $bookmarksCount; $i++) {
             $bookmark = $b[$i];
             $prevBookmark = $b[$i - 1] ?? null;
 
