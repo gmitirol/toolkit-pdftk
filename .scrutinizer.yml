@@ -14,7 +14,15 @@ build:
     tests:
         before:
             - 'sudo apt-get update'
-            - 'sudo apt-get install -y pdftk'
+            - 'sudo apt-get install -y pdftk wget git'
+            - 'DIR=$(pwd)'
+            - 'cd /'
+            - 'sudo wget "https://go.dev/dl/go1.22.1.linux-amd64.tar.gz"'
+            - 'sudo tar xzf go1.22.1.linux-amd64.tar.gz'
+            - 'sudo git clone https://github.com/pdfcpu/pdfcpu /root/pdfcpu'
+            - 'sudo bash -c "cd /root/pdfcpu/cmd/pdfcpu && /go/bin/go install"'
+            - 'sudo cp ~/go/bin/pdfcpu /usr/bin/pdfcpu'
+            - 'cd "$DIR"'
         override:
             -
                 command: 'vendor/bin/phpunit --coverage-clover=clover.xml'
