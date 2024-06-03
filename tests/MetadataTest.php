@@ -116,92 +116,92 @@ class PdftkMetadataTest extends TestCase
 
     /**
      * @group FunctionalTest
-     * @todo Add data provider when pdfcpu supports setting metadata
+     * @dataProvider getWrapperImplementations
      */
-    public function testOutputFileNotFound()
+    public function testOutputFileNotFound($wrapper)
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
         $this->expectException(FileNotFoundException::Class);
 
-        $meta = new Metadata();
+        $meta = new Metadata($wrapper);
         $meta->set('Creator', 'mplx')
                 ->apply($file);
     }
 
     /**
      * @group FunctionalTest
-     * @todo Add data provider when pdfcpu supports setting metadata
+     * @dataProvider getWrapperImplementations
      */
-    public function testFileSetGet()
+    public function testFileSetGet($wrapper)
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
-        $target = tempnam(sys_get_temp_dir(), 'pdf');
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
         $randomText = microtime(false);
 
-        $metaSet = new Metadata();
+        $metaSet = new Metadata($wrapper);
         $metaSet->set('Creator', $randomText . 'C')
-                ->set('Producer', $randomText . 'P')
+                ->set('Title', $randomText . 'T')
                 ->apply($source, $target);
 
-        $metaGet = new Metadata();
+        $metaGet = new Metadata($wrapper);
         $metaGet->import($target);
 
         $this->assertSame($randomText . 'C', $metaGet->get('Creator'));
-        $this->assertSame($randomText . 'P', $metaGet->get('Producer'));
+        $this->assertSame($randomText . 'T', $metaGet->get('Title'));
 
         unlink($target);
     }
 
     /**
      * @group FunctionalTest
-     * @todo Add data provider when pdfcpu supports setting metadata
+     * @dataProvider getWrapperImplementations
      */
-    public function testFileSetGetFilenameWithSpaces()
+    public function testFileSetGetFilenameWithSpaces($wrapper)
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
-        $target = tempnam(sys_get_temp_dir(), 'pdf with space');
+        $target = tempnam(sys_get_temp_dir(), 'pdf with space') . '.pdf';
 
         $randomText = microtime(false);
 
-        $metaSet = new Metadata();
+        $metaSet = new Metadata($wrapper);
         $metaSet->set('Creator', $randomText . 'C')
-                ->set('Producer', $randomText . 'P')
+                ->set('Title', $randomText . 'T')
                 ->apply($source, $target);
 
-        $metaGet = new Metadata();
+        $metaGet = new Metadata($wrapper);
         $metaGet->import($target);
 
         $this->assertSame($randomText . 'C', $metaGet->get('Creator'));
-        $this->assertSame($randomText . 'P', $metaGet->get('Producer'));
+        $this->assertSame($randomText . 'T', $metaGet->get('Title'));
 
         unlink($target);
     }
 
     /**
      * @group FunctionalTest
-     * @todo Add data provider when pdfcpu supports setting metadata
+     * @dataProvider getWrapperImplementations
      */
-    public function testFileSetGetSameFile()
+    public function testFileSetGetSameFile($wrapper)
     {
         $source = __DIR__ . '/Fixtures/example.pdf';
 
-        $testPdf = $target = tempnam(sys_get_temp_dir(), 'pdf');
+        $testPdf = $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
         copy($source, $testPdf);
 
         $randomText = microtime(false);
 
-        $metaSet = new Metadata();
+        $metaSet = new Metadata($wrapper);
         $metaSet->set('Creator', $randomText . 'C')
-                ->set('Producer', $randomText . 'P')
+                ->set('Title', $randomText . 'T')
                 ->apply($testPdf);
 
-        $metaGet = new Metadata();
+        $metaGet = new Metadata($wrapper);
         $metaGet->import($testPdf);
 
         $this->assertSame($randomText . 'C', $metaGet->get('Creator'));
-        $this->assertSame($randomText . 'P', $metaGet->get('Producer'));
+        $this->assertSame($randomText . 'T', $metaGet->get('Title'));
 
         unlink($testPdf);
     }

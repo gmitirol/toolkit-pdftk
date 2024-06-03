@@ -92,21 +92,82 @@ class PdfcpuMetadataTest extends TestCase
         $pdfcpu->importMetadata($metadata, $pdf);
     }
 
-    /**
-     * @todo Remove when pdfcpu supports setting metadata
-     */
-    public function testMetadataApplyNotImplementedInPdfcpu()
+    public function testApplyMetadataInputIsCopiedToOutput()
+    {
+        $binary = __DIR__ . '/Fixtures/binary.sh';
+        $source = __DIR__ . '/Fixtures/empty.pdf';
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
+
+
+
+        $mockProcess = $this->createMock(Process::class);
+        $mockProcess->expects($this->once())
+                    ->method('mustRun');
+
+        $mockProcessFactory = $this->createMock(ProcessFactory::class);
+        $mockProcessFactory->expects($this->once())
+                           ->method('createProcess')
+                           ->with(sprintf('\'%s\' properties add \'%s\' Title=\'Foo\'', $binary, $target))
+                           ->willReturn($mockProcess);
+
+        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $metadata = new Metadata($wrapper);
+        $metadata->set('Title', 'Foo');
+        $wrapper->applyMetadata($metadata, $source, $target);
+        $this->assertSame(file_get_contents($source), file_get_contents($target));
+        @unlink($target);
+    }
+
+    public function testApplyMetadataException()
+    {
+        $binary = __DIR__ . '/Fixtures/binary.sh';
+        $source = __DIR__ . '/Fixtures/empty.pdf';
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
+
+
+
+        $mockProcess = $this->createMock(Process::class);
+        $mockProcess->expects($this->once())
+                    ->method('mustRun')
+                    ->will($this->throwException(new Exception('ERR')));
+
+        $mockProcessFactory = $this->createMock(ProcessFactory::class);
+        $mockProcessFactory->expects($this->once())
+                           ->method('createProcess')
+                           ->with(sprintf('\'%s\' properties add \'%s\' Title=\'Foo\'', $binary, $target))
+                           ->willReturn($mockProcess);
+
+        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $metadata = new Metadata($wrapper);
+        $metadata->set('Title', 'Foo');
+        $this->expectException(PdfException::class);
+        $this->expectExceptionMessage(sprintf('Failed to write PDF metadata to "%s"! Error: ERR', $target));
+        $wrapper->applyMetadata($metadata, $source, $target);
+        @unlink($target);
+    }
+
+    public function testApplyMetadataRealPdf()
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
-        $target = tempnam(sys_get_temp_dir(), 'pdf');
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
-        $randomText = microtime(false);
+        $wrapper = new PdfcpuWrapper();
+        $metaSet = new Metadata($wrapper);
 
-        $metaSet = new Metadata(new PdfcpuWrapper());
+        $metaSet->set('Creator', 'Awesome PDF creator 1.0')
+                ->set('Subject', 'E=mc²')
+                ->set('Title', 'Relativity: The Special and General Theory')
+                ->set('Author', 'Älbert €instein');
 
-        $this->expectException(NotImplementedException::class);
-        $metaSet->set('Creator', $randomText . 'C')
-                ->set('Producer', $randomText . 'P')
-                ->apply($source, $target);
+        $wrapper->applyMetadata($metaSet, $source, $target);
+
+        $metaGet = new Metadata($wrapper);
+        $wrapper->importMetadata($metaGet, $target);
+        $this->assertSame('Awesome PDF creator 1.0', $metaGet->get('Creator'));
+        $this->assertSame('E=mc²', $metaGet->get('Subject'));
+        $this->assertSame('Relativity: The Special and General Theory', $metaGet->get('Title'));
+        $this->assertSame('Älbert €instein', $metaGet->get('Author'));
+
+        @unlink($target);
     }
 }

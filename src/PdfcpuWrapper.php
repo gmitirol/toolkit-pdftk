@@ -327,7 +327,49 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
      */
     public function applyMetadata(Metadata $metadata, string $infile, string $outfile = null): self
     {
-        throw new NotImplementedException('The current pdfcpu version does not support to set metadata!');
+        $temporaryOutFile = false;
+
+        $this->checkPdfFileExists($infile);
+
+        $properties = [];
+        foreach ($metadata->all() as $key => $value) {
+            $properties[] = sprintf('%s=%s', $key, $this->escaper->shellArg($value));
+        }
+
+        $propArgs = implode(' ', $properties);
+
+        if ($outfile === null || $infile === $outfile) {
+            $temporaryOutFile = true;
+            $outfile = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
+        }
+
+        copy($infile, $outfile);
+
+        $cmd = sprintf('%s properties add %s %s', $this->getBinary(), $this->escaper->shellArg($outfile), $propArgs);
+        $process = $this->processFactory->createProcess($cmd);
+
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
+            $exception = new PdfException(
+                sprintf('Failed to write PDF metadata to "%s"! Error: %s', $outfile, $e->getMessage()),
+                0,
+                $e,
+                $process->getErrorOutput(),
+                $process->getOutput()
+            );
+        }
+
+        if ($temporaryOutFile && !isset($exception)) {
+            unlink($infile);
+            rename($outfile, $infile);
+        }
+
+        if (isset($exception)) {
+            throw $exception;
+        }
+
+        return $this;
     }
 
     /**
