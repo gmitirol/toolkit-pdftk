@@ -2,7 +2,7 @@
 /**
  * General PDF exception.
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -21,26 +21,25 @@ use Exception;
 class PdfException extends Exception
 {
     /**
-     * @var string
+     * @var string|null
      */
     private $pdfError;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $pdfOutput;
 
     /**
      * Constructor.
-     *
-     * @param string    $message
-     * @param int       $code
-     * @param Exception $previous
-     * @param string    $pdfError
-     * @param string    $pdfOutput
      */
-    public function __construct($message, $code = 0, Exception $previous = null, $pdfError = null, $pdfOutput = null)
-    {
+    public function __construct(
+        string $message,
+        int $code = 0,
+        Exception $previous = null,
+        string $pdfError = null,
+        string $pdfOutput = null
+    ) {
         parent::__construct($message, $code, $previous);
 
         $this->pdfError = $pdfError;
@@ -50,7 +49,7 @@ class PdfException extends Exception
     /**
      * Returns the concrete error message of the underlying PDF library.
      */
-    public function getPdfError()
+    public function getPdfError(): ?string
     {
         return $this->pdfError;
     }
@@ -58,7 +57,7 @@ class PdfException extends Exception
     /**
      * Returns the concrete output of the underlying PDF library.
      */
-    public function getPdfOutput()
+    public function getPdfOutput(): ?string
     {
         return $this->pdfOutput;
     }

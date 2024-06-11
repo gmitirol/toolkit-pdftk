@@ -8,13 +8,39 @@ filter:
 build:
     environment:
         php:
-            version: 7.2
+            version: 7.3
             pecl_extensions:
                 - xdebug
     tests:
         before:
+            # Install dependencies and store working dir (required for Scrutinizer)
             - 'sudo apt-get update'
-            - 'sudo apt-get install -y pdftk'
+            - 'sudo apt-get install -y wget git'
+            - 'DIR=$(pwd)'
+            # Install OpenJDK 11 (for PDFtk)
+            - 'wget https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz'
+            - 'tar xzvf openjdk-11_linux-x64_bin.tar.gz'
+            - 'sudo mv jdk-11 /usr/lib/jvm/openjdk-11'
+            - 'sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/openjdk-11/bin/java 1'
+            # Install PDFtk
+            - 'wget https://gitlab.com/api/v4/projects/5024297/packages/generic/pdftk-java/v3.3.3/pdftk-all.jar -O pdftk.jar'
+            - 'sudo mv pdftk.jar /usr/bin/'
+            - |
+              cat << EOF > pdftk.tmp
+              #!/bin/sh
+              java -jar "/usr/bin/pdftk.jar" "\$@"
+              EOF
+            - 'sudo mv pdftk.tmp /usr/bin/pdftk'
+            - 'chmod +x /usr/bin/pdftk'
+            # Install golang (for pdfcpu)
+            - 'cd /'
+            - 'sudo wget "https://go.dev/dl/go1.22.1.linux-amd64.tar.gz"'
+            - 'sudo tar xzf go1.22.1.linux-amd64.tar.gz'
+            # Install pdfcpu
+            - 'sudo git clone https://github.com/pdfcpu/pdfcpu /root/pdfcpu'
+            - 'sudo bash -c "cd /root/pdfcpu/cmd/pdfcpu && /go/bin/go install"'
+            - 'sudo cp ~/go/bin/pdfcpu /usr/bin/pdfcpu'
+            - 'cd "$DIR"'
         override:
             -
                 command: 'vendor/bin/phpunit --coverage-clover=clover.xml'

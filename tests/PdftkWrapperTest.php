@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -23,6 +23,11 @@ use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
+/**
+ * This test class tests general methods of the pdftk wrapper.
+ *
+ * The features implemented from WrapperInterface are unit-tested in individual Pdftk*Test classes.
+ */
 class PdftkWrapperTest extends TestCase
 {
     public function testGuessBinary()
@@ -60,7 +65,7 @@ class PdftkWrapperTest extends TestCase
         $binary = __DIR__ . '/Fixtures/missing.sh';
 
         $this->expectException(FileNotFoundException::Class);
-        $pdftk = new PdftkWrapper($binary);
+        new PdftkWrapper($binary);
     }
 
     public function testGetPdfDataDumpException()
@@ -100,8 +105,8 @@ class PdftkWrapperTest extends TestCase
         $binary = __DIR__ . '/Fixtures/binary.sh';
         $pdf = __DIR__ . '/Fixtures/example.pdf';
 
-        $pdfErrorMessage = 'PDf error message';
-        $pdfOutputMessage = 'PDf output message';
+        $pdfErrorMessage = 'PDF error message';
+        $pdfOutputMessage = 'PDF output message';
 
         $exception = $this->getTestException();
 
@@ -176,8 +181,8 @@ class PdftkWrapperTest extends TestCase
         $pdf = __DIR__ . '/Fixtures/example.pdf';
         $target = tempnam(sys_get_temp_dir(), 'pdf');
 
-        $pdfErrorMessage = 'PDf error message';
-        $pdfOutputMessage = 'PDf output message';
+        $pdfErrorMessage = 'PDF error message';
+        $pdfOutputMessage = 'PDF output message';
 
         $exception = $this->getTestException();
 

@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -16,6 +16,8 @@ use PHPUnit\Framework\TestCase;
 
 use Gmi\Toolkit\Pdftk\Pages;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PagesTest extends TestCase
 {
@@ -25,19 +27,27 @@ class PagesTest extends TestCase
     const A3_HEIGHT = 420;
     const A3_WIDTH = 297;
 
-    public function testImportNotFound()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImportNotFound($wrapper)
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
 
         $this->expectException(FileNotFoundException::Class);
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
     }
 
-    public function testImportA4()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImportA4($wrapper)
     {
         $file = __DIR__ . '/Fixtures/a4.pdf';
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
 
         $pages = $p->all();
@@ -50,10 +60,14 @@ class PagesTest extends TestCase
         $this->assertSame(1, $page1->getPageNumber());
     }
 
-    public function testImport()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImport($wrapper)
     {
         $file = __DIR__ . '/Fixtures/pages.pdf';
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
 
         $pages = $p->all();
@@ -90,10 +104,14 @@ class PagesTest extends TestCase
         $this->assertSame(0, $page6->getRotation());
     }
 
-    public function testImportMixedHugePage()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImportMixedHugePage($wrapper)
     {
         $file = __DIR__ . '/Fixtures/mixed-hugepage.pdf';
-        $p = new Pages();
+        $p = new Pages($wrapper);
         $p->import($file);
 
         $pages = $p->all();
@@ -110,5 +128,13 @@ class PagesTest extends TestCase
         $this->assertSame(841, $page2->getHeightMm());
         $this->assertSame(0, $page2->getRotation());
         $this->assertSame(2, $page2->getPageNumber());
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }

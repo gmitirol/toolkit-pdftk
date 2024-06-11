@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -18,6 +18,8 @@ use PHPUnit\Framework\TestCase;
 use Gmi\Toolkit\Pdftk\Metadata;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\PdfTk\Exception\PdfException;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PdftkMetadataTest extends TestCase
 {
@@ -73,7 +75,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->set(null, 'mplx');
+        $meta->set(0, 'mplx');
     }
 
     public function testGetInvalidKey()
@@ -81,7 +83,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->get(null);
+        $meta->get(0);
     }
 
     public function testCheckInvalidKey()
@@ -89,7 +91,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->has(null);
+        $meta->has(0);
     }
 
     public function testRemoveInvalidKey()
@@ -97,7 +99,7 @@ class PdftkMetadataTest extends TestCase
         $meta = new Metadata();
 
         $this->expectException(PdfException::Class);
-        $meta->remove(null);
+        $meta->remove(0);
     }
 
     public function testClear()
@@ -112,90 +114,118 @@ class PdftkMetadataTest extends TestCase
         );
     }
 
-    public function testOutputFileNotFound()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testOutputFileNotFound($wrapper)
     {
         $file = __DIR__ . '/Fixtures/missing.pdf';
         $this->expectException(FileNotFoundException::Class);
 
-        $meta = new Metadata();
+        $meta = new Metadata($wrapper);
         $meta->set('Creator', 'mplx')
                 ->apply($file);
     }
 
-    public function testFileSetGet()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testFileSetGet($wrapper)
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
-        $target = tempnam(sys_get_temp_dir(), 'pdf');
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
         $randomText = microtime(false);
 
-        $metaSet = new Metadata();
+        $metaSet = new Metadata($wrapper);
         $metaSet->set('Creator', $randomText . 'C')
-                ->set('Producer', $randomText . 'P')
+                ->set('Title', $randomText . 'T')
                 ->apply($source, $target);
 
-        $metaGet = new Metadata();
+        $metaGet = new Metadata($wrapper);
         $metaGet->import($target);
 
         $this->assertSame($randomText . 'C', $metaGet->get('Creator'));
-        $this->assertSame($randomText . 'P', $metaGet->get('Producer'));
+        $this->assertSame($randomText . 'T', $metaGet->get('Title'));
 
         unlink($target);
     }
 
-    public function testFileSetGetFilenameWithSpaces()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testFileSetGetFilenameWithSpaces($wrapper)
     {
         $source = __DIR__ . '/Fixtures/empty.pdf';
-        $target = tempnam(sys_get_temp_dir(), 'pdf with space');
+        $target = tempnam(sys_get_temp_dir(), 'pdf with space') . '.pdf';
 
         $randomText = microtime(false);
 
-        $metaSet = new Metadata();
+        $metaSet = new Metadata($wrapper);
         $metaSet->set('Creator', $randomText . 'C')
-                ->set('Producer', $randomText . 'P')
+                ->set('Title', $randomText . 'T')
                 ->apply($source, $target);
 
-        $metaGet = new Metadata();
+        $metaGet = new Metadata($wrapper);
         $metaGet->import($target);
 
         $this->assertSame($randomText . 'C', $metaGet->get('Creator'));
-        $this->assertSame($randomText . 'P', $metaGet->get('Producer'));
+        $this->assertSame($randomText . 'T', $metaGet->get('Title'));
 
         unlink($target);
     }
 
-    public function testFileSetGetSameFile()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testFileSetGetSameFile($wrapper)
     {
         $source = __DIR__ . '/Fixtures/example.pdf';
 
-        $testPdf = $target = tempnam(sys_get_temp_dir(), 'pdf');
+        $testPdf = $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
         copy($source, $testPdf);
 
         $randomText = microtime(false);
 
-        $metaSet = new Metadata();
+        $metaSet = new Metadata($wrapper);
         $metaSet->set('Creator', $randomText . 'C')
-                ->set('Producer', $randomText . 'P')
+                ->set('Title', $randomText . 'T')
                 ->apply($testPdf);
 
-        $metaGet = new Metadata();
+        $metaGet = new Metadata($wrapper);
         $metaGet->import($testPdf);
 
         $this->assertSame($randomText . 'C', $metaGet->get('Creator'));
-        $this->assertSame($randomText . 'P', $metaGet->get('Producer'));
+        $this->assertSame($randomText . 'T', $metaGet->get('Title'));
 
         unlink($testPdf);
     }
 
-    public function testImport()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testImport($wrapper)
     {
         $source = __DIR__ . '/Fixtures/example.pdf';
 
-        $meta = new Metadata();
+        $meta = new Metadata($wrapper);
         $meta->import($source);
         $this->assertSame('author', $meta->get('Author'));
         $this->assertSame('creator', $meta->get('Creator'));
         $this->assertSame('producer', $meta->get('Producer'));
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }

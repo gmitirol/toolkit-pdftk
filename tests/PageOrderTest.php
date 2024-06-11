@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -14,138 +14,153 @@ namespace Gmi\Toolkit\Pdftk\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-use Symfony\Component\Process\Process;
-
+use Gmi\Toolkit\Pdftk\Constant\PageSizes;
 use Gmi\Toolkit\Pdftk\Exception\ReorderException;
+use Gmi\Toolkit\Pdftk\Page;
+use Gmi\Toolkit\Pdftk\Pages;
 use Gmi\Toolkit\Pdftk\PageOrder;
+use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
-use Exception;
-
-class PdfOrderTest extends TestCase
+class PageOrderTest extends TestCase
 {
-    public function testReorderDifferentNumberOfPages()
+
+    public function testReorderEmptyPageNumbers()
     {
         $mockWrapper = $this->createMock(PdftkWrapper::class);
-        $mockWrapper->expects($this->once())
-                    ->method('getPdfDataDump')
-                    ->with('example.pdf')
-                    ->willReturn("PageMediaBegin\n");
         $mockWrapper->expects($this->never())
-                    ->method('createProcess');
+                    ->method('importPages');
+        $mockWrapper->expects($this->never())
+                    ->method('reorder');
 
         $pageOrder = new PageOrder($mockWrapper);
 
         $this->expectException(ReorderException::class);
-        $this->expectExceptionMessage('Invalid number of pages!');
+        $this->expectExceptionMessage('Failed to reorder PDF "example.pdf"! Error: Empty page order!');
 
-        $pageOrder->reorder('example.pdf', [2, 1], 'output.pdf');
+        $pageOrder->reorder('example.pdf', [], 'output.pdf');
     }
 
     public function testReorderIncorrectPageNumbers()
     {
         $mockWrapper = $this->createMock(PdftkWrapper::class);
-        $mockWrapper->expects($this->once())
-                    ->method('getPdfDataDump')
-                    ->with('example.pdf')
-                    ->willReturn("PageMediaBegin\nPageMediaBegin\nPageMediaBegin\n");
         $mockWrapper->expects($this->never())
-                    ->method('createProcess');
+                    ->method('importPages');
+        $mockWrapper->expects($this->never())
+                    ->method('reorder');
 
         $pageOrder = new PageOrder($mockWrapper);
 
         $this->expectException(ReorderException::class);
-        $this->expectExceptionMessage('Invalid page order!');
+        $this->expectExceptionMessage('Failed to reorder PDF "example.pdf"! Error: Invalid page order!');
 
         $pageOrder->reorder('example.pdf', [17, 2, 1], 'output.pdf');
     }
 
+    public function testReorderDifferentNumberOfPages()
+    {
+        $mockWrapper = $this->createMock(PdftkWrapper::class);
+        $mockWrapper->expects($this->once())
+                    ->method('importPages')
+                    ->with($this->isInstanceOf(Pages::class), 'example.pdf');
+
+        $pageOrder = new PageOrder($mockWrapper);
+
+        $this->expectException(ReorderException::class);
+        $this->expectExceptionMessage('Failed to reorder PDF "example.pdf"! Error: Invalid number of pages!');
+
+        $pageOrder->reorder('example.pdf', [2, 1], 'output.pdf');
+    }
+
     public function testReorder()
     {
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun')
-                    ->willReturn($mockProcess);
+        $pagesCallback = function (Pages $pages) {
+            $pages->add(new Page());
+            $pages->add(new Page());
+            $pages->add(new Page());
+
+            return true;
+        };
 
         $mockWrapper = $this->createMock(PdftkWrapper::class);
         $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/usr/bin/pdftk');
+                    ->method('importPages')
+                    ->with($this->callback($pagesCallback), 'example.pdf');
         $mockWrapper->expects($this->once())
-                    ->method('getPdfDataDump')
-                    ->with('example.pdf')
-                    ->willReturn("PageMediaBegin\nPageMediaBegin\nPageMediaBegin\n");
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    ->with('/usr/bin/pdftk \'example.pdf\' cat 3 1 2 output \'output.pdf\'')
-                    ->willReturn($mockProcess);
+                    ->method('reorder')
+                    ->with('example.pdf', [3, 1, 2], 'output.pdf');
 
         $pageOrder = new PageOrder($mockWrapper);
 
         $pageOrder->reorder('example.pdf', [3, 1, 2], 'output.pdf');
     }
 
-    public function testReorderOverwriteInputFile()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testReorderRealPdf($wrapper)
     {
-        copy(__DIR__ . '/Fixtures/example-multipage.pdf', '/tmp/example-multipage.pdf');
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun')
-                    ->willReturn($mockProcess);
+        $file = __DIR__ . '/Fixtures/pagesizes.pdf';
 
-        $mockWrapper = $this->createMock(PdftkWrapper::class);
-        $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/usr/bin/pdftk');
-        $mockWrapper->expects($this->once())
-                    ->method('getPdfDataDump')
-                    ->with('/tmp/example-multipage.pdf')
-                    ->willReturn("PageMediaBegin\nPageMediaBegin\nPageMediaBegin\nnPageMediaBegin\n");
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    ->with($this->stringContains('/usr/bin/pdftk \'/tmp/example-multipage.pdf\' cat 3 4 1 2 output '))
-                    ->willReturn($mockProcess);
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
-        $pageOrder = new PageOrder($mockWrapper);
+        $wrapper->reorder($file, [3, 1, 2], $target);
 
-        $pageOrder->reorder('/tmp/example-multipage.pdf', [3, 4, 1, 2], null);
+        // verify the page info to ensure the pages are split correctly
+        $pages = new Pages();
+        $wrapper->importPages($pages, $target);
+
+        $pagesArray = $pages->all();
+        $this->assertSame(3, count($pagesArray));
+
+        $this->assertSame(PageSizes::A3_WIDTH, $pagesArray[0]->getHeightMm());
+        $this->assertSame(PageSizes::A3_HEIGHT, $pagesArray[0]->getWidthMm());
+
+        $this->assertSame(PageSizes::A4_HEIGHT, $pagesArray[1]->getHeightMm());
+        $this->assertSame(PageSizes::A4_WIDTH, $pagesArray[1]->getWidthMm());
+
+        $this->assertSame(PageSizes::A4_WIDTH, $pagesArray[2]->getHeightMm());
+        $this->assertSame(PageSizes::A4_HEIGHT, $pagesArray[2]->getWidthMm());
+
+        unlink($target);
     }
 
-    public function testReorderOverwriteInputFileFailure()
+    /**
+     * @group FunctionalTest
+     * @dataProvider getWrapperImplementations
+     */
+    public function testReorderOverwriteInputFile($wrapper)
     {
-        copy(__DIR__ . '/Fixtures/example-multipage.pdf', '/tmp/example-multipage.pdf');
-        $mockProcess = $this->createMock(Process::class);
-        $mockProcess->expects($this->once())
-                    ->method('mustRun')
-                    ->will($this->throwException(new Exception('fail')));
+        $file = __DIR__ . '/Fixtures/a4.pdf';
+        $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
-        $mockWrapper = $this->createMock(PdftkWrapper::class);
-        $mockWrapper->expects($this->once())
-                    ->method('getBinary')
-                    ->willReturn('/usr/bin/pdftk');
-        $mockWrapper->expects($this->once())
-                    ->method('getPdfDataDump')
-                    ->with('/tmp/example-multipage.pdf')
-                    ->willReturn("PageMediaBegin\nPageMediaBegin\nPageMediaBegin\nnPageMediaBegin\n");
-        $mockWrapper->expects($this->once())
-                    ->method('createProcess')
-                    ->with($this->stringContains('/usr/bin/pdftk \'/tmp/example-multipage.pdf\' cat 3 4 1 2 output '))
-                    ->willReturn($mockProcess);
+        copy($file, $target);
 
-        $pageOrder = new PageOrder($mockWrapper);
-        
-        try {
-            $pageOrder->reorder('/tmp/example-multipage.pdf', [3, 4, 1, 2], null);
-        } catch (ReorderException $e) {
-            // exception is expected, see below
-        }
+        $this->assertSame(sha1_file($file), sha1_file($target));
 
-        $this->assertNotNull($e);
-        $this->assertSame('Failed to reorder PDF "/tmp/example-multipage.pdf"! Error: fail', $e->getMessage());
-        $this->assertSame(
-            file_get_contents(__DIR__ . '/Fixtures/example-multipage.pdf'),
-            file_get_contents('/tmp/example-multipage.pdf'),
-            'The document in the temp file should still be the same is at was (a copy of the fixture)'
-        );
+        $wrapper->reorder($target, [1], $target);
+
+        $this->assertNotSame(sha1_file($file), sha1_file($target));
+
+        // verify the page info to ensure the pages are split correctly
+        $pages = new Pages();
+        $wrapper->importPages($pages, $target);
+
+        $pagesArray = $pages->all();
+        $this->assertSame(1, count($pagesArray));
+
+        $this->assertSame(PageSizes::A4_HEIGHT, $pagesArray[0]->getHeightMm());
+        $this->assertSame(PageSizes::A4_WIDTH, $pagesArray[0]->getWidthMm());
+
+        unlink($target);
+    }
+
+    public function getWrapperImplementations(): array
+    {
+        return [
+            [new PdftkWrapper()],
+            [new PdfcpuWrapper()],
+        ];
     }
 }

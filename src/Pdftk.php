@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -48,23 +48,20 @@ class Pdftk
     private $pageOrder;
 
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
     /**
      * Constructor.
      *
-     * @param array        $options
-     * @param PdftkWrapper $wrapper
-     *
      * @throws PdfException
      */
-    public function __construct($options = [], PdftkWrapper $wrapper = null)
+    public function __construct(array $options = [], WrapperInterface $wrapper = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
 
-        if (isset($options['binary'])) {
+        if (isset($options['binary']) && $this->wrapper instanceof BinaryPathAwareInterface) {
             $this->wrapper->setBinary($options['binary']);
         }
 
@@ -78,159 +75,124 @@ class Pdftk
 
     /**
      * Returns the bookmarks object.
-     *
-     * @return Bookmarks
      */
-    public function getBookmarks()
+    public function getBookmarks(): Bookmarks
     {
         return $this->bookmarks;
     }
 
     /**
      * Alias for getBookmarks().
-     *
-     * @return Bookmarks
      */
-    public function bookmarks()
+    public function bookmarks(): Bookmarks
     {
         return $this->getBookmarks();
     }
 
     /**
      * Returns the metadata object.
-     *
-     * @return Metadata
      */
-    public function getMetadata()
+    public function getMetadata(): Metadata
     {
         return $this->metadata;
     }
 
     /**
      * Alias for getMetadata().
-     *
-     * @return Metadata
      */
-    public function metadata()
+    public function metadata(): Metadata
     {
         return $this->getMetadata();
     }
 
     /**
      * Returns the pages object.
-     *
-     * @return Pages
      */
-    public function getPages()
+    public function getPages(): Pages
     {
         return $this->pages;
     }
 
     /**
      * Alias for getPages().
-     *
-     * @return Pages
      */
-    public function pages()
+    public function pages(): Pages
     {
         return $this->getPages();
     }
 
     /**
      * Returns the PDF joiner.
-     *
-     * @return Joiner
      */
-    public function getJoiner()
+    public function getJoiner(): Joiner
     {
         return $this->joiner;
     }
 
     /**
      * Alias for getJoiner().
-     *
-     * @return Joiner
      */
-    public function joiner()
+    public function joiner(): Joiner
     {
         return $this->getJoiner();
     }
 
     /**
      * Returns the PDF splitter.
-     *
-     * @return Splitter
      */
-    public function getSplitter()
+    public function getSplitter(): Splitter
     {
         return $this->splitter;
     }
 
     /**
      * Alias for getSplitter().
-     *
-     * @return Splitter
      */
-    public function splitter()
+    public function splitter(): Splitter
     {
         return $this->getSplitter();
     }
 
     /**
      * Returns the PDF page order changer.
-     *
-     * @return Splitter
      */
-    public function getPageOrder()
+    public function getPageOrder(): PageOrder
     {
         return $this->pageOrder;
     }
 
     /**
      * Alias for getPageOrder().
-     *
-     * @return Splitter
      */
-    public function order()
+    public function order(): PageOrder
     {
         return $this->getPageOrder();
     }
 
     /**
      * Apply bookmarks and metadata to PDF file.
-     *
-     * @param string $infile
-     * @param string $outfile
-     *
-     * @return self
      */
-    public function apply($infile, $outfile = null)
+    public function apply(string $infile, string $outfile = null): self
     {
         $this->bookmarks->apply($infile, $outfile);
-        $this->metadata->apply($outfile);
+        $this->metadata->apply($outfile ?? $infile);
 
         return $this;
     }
 
     /**
      * Imports bookmarks, metadata and page information from a PDF file.
-     *
-     * @param string $infile
-     *
-     * @return self
      */
-    public function import($infile)
+    public function import(string $infile): self
     {
-        $dump = $this->wrapper->getPdfDataDump($infile);
-
         $this->pages->clear();
         $this->bookmarks->clear();
         $this->metadata->clear();
 
-        $this->pages->importFromDump($dump);
+        $this->pages->import($infile);
         $this->bookmarks->setMaxpage(count($this->pages->all()));
-        $this->bookmarks->importFromDump($dump);
-        $this->metadata->importFromDump($dump);
+        $this->bookmarks->import($infile);
+        $this->metadata->import($infile);
 
         return $this;
     }

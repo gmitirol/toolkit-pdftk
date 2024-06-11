@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -15,6 +15,8 @@ namespace Gmi\Toolkit\Pdftk;
 
 /**
  * Represents a single PDF bookmark.
+ *
+ * @psalm-suppress MissingConstructor
  */
 class Bookmark
 {
@@ -41,12 +43,8 @@ class Bookmark
 
     /**
      * Sets the bookmark title.
-     *
-     * @param string $title
-     *
-     * @return self
      */
-    public function setTitle($title)
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
@@ -55,22 +53,16 @@ class Bookmark
 
     /**
      * Returns the bookmark title.
-     *
-     * @return string
      */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
 
     /**
      * Sets the bookmark page.
-     *
-     * @param int $pageNumber
-     *
-     * @return self
      */
-    public function setPageNumber($pageNumber)
+    public function setPageNumber(int $pageNumber): self
     {
         $this->pageNumber = $pageNumber;
 
@@ -79,22 +71,16 @@ class Bookmark
 
     /**
      * Returns the bookmark page.
-     *
-     * @return int
      */
-    public function getPageNumber()
+    public function getPageNumber(): int
     {
         return $this->pageNumber;
     }
 
     /**
      * Sets the bookmark level.
-     *
-     * @param int $level
-     *
-     * @return self
      */
-    public function setLevel($level)
+    public function setLevel(int $level): self
     {
         $this->level = $level;
 
@@ -103,10 +89,8 @@ class Bookmark
 
     /**
      * Returns the bookmark level.
-     *
-     * @return int
      */
-    public function getLevel()
+    public function getLevel(): int
     {
         return $this->level;
     }

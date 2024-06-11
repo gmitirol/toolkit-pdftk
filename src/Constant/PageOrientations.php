@@ -1,6 +1,6 @@
 <?php
 /**
- * File not found exception.
+ * PageOrientations
  *
  * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
@@ -10,11 +10,15 @@
  * @package pdftk
  */
 
-namespace Gmi\Toolkit\Pdftk\Exception;
+namespace Gmi\Toolkit\Pdftk\Constant;
 
 /**
- * This exception should be thrown if required files can't be found.
+ * Page orientation constants.
  */
-class FileNotFoundException extends PdfException
+class PageOrientations
 {
+    public const UP = 0;
+    public const RIGHT = 90;
+    public const DOWN = 180;
+    public const LEFT = 270;
 }

@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Martin Pircher <martin.pircher@i-med.ac.at>
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -51,6 +51,9 @@ class PdftkTest extends TestCase
         new Pdftk(['binary' => $binary], $mockWrapper);
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testImport()
     {
         $file = __DIR__ . '/Fixtures/example2.pdf';
@@ -80,6 +83,9 @@ class PdftkTest extends TestCase
         $this->assertSame('Example Creator', $pdftk->metadata()->get('Creator'));
     }
 
+    /**
+     * @group FunctionalTest
+     */
     public function testApply()
     {
         $file = __DIR__ . '/Fixtures/example2.pdf';
@@ -107,6 +113,7 @@ class PdftkTest extends TestCase
         $this->assertSame(1, $pdftkGet->bookmarks()->all()[3]->getPageNumber());
         $this->assertSame(2, $pdftkGet->bookmarks()->all()[3]->getLevel());
         $this->assertSame('Section 3', $pdftkGet->bookmarks()->all()[3]->getTitle());
+        $this->assertSame('Jane Doe & Erika Mustermann', $pdftkGet->metadata()->get('Author'));
 
         unlink($target);
     }

@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2022 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @author Nikola Vrlazic <nikola.vrlazic@i-med.ac.at>
  * @license LGPL-3.0-only
@@ -14,14 +14,14 @@
 namespace Gmi\Toolkit\Pdftk;
 
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
+use Symfony\Component\Finder\SplFileInfo as SymfonySplFileInfo;
 
-use Gmi\Toolkit\Pdftk\Exception\JoinException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
+use Gmi\Toolkit\Pdftk\Exception\JoinException;
+use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Sorter\FileSorterInterface;
 use Gmi\Toolkit\Sorter\NaturalFileSorter;
 
-use Exception;
 use SplFileInfo;
 
 /**
@@ -45,19 +45,18 @@ class Joiner
     private $sorter;
 
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
     /**
      * Constructor.
-     *
-     * @param PdftkWrapper        $wrapper
-     * @param Finder              $finder
-     * @param FileSorterInterface $sorter
      */
-    public function __construct(PdftkWrapper $wrapper = null, Finder $finder = null, FileSorterInterface $sorter = null)
-    {
+    public function __construct(
+        WrapperInterface $wrapper = null,
+        Finder $finder = null,
+        FileSorterInterface $sorter = null
+    ) {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
         $this->finder = $finder ?: new Finder();
         $this->sorter = $sorter ?: new NaturalFileSorter();
@@ -66,14 +65,10 @@ class Joiner
     /**
      * Joins all PDFs in a folder matching a pattern, naturally sorted, to one file.
      *
-     * @param string $inputFolder
-     * @param string $pattern
-     * @param string $output
-     *
      * @throws FileNotFoundException if no matching input files are found in the input folder
      * @throws JoinException if the PDF join fails
      */
-    public function joinByPattern($inputFolder, $pattern, $output)
+    public function joinByPattern(string $inputFolder, string $pattern, string $output): void
     {
         // array of files which match the pattern
         $foundFiles = $this->getFiles($inputFolder, $pattern);
@@ -91,57 +86,42 @@ class Joiner
         // array of sorted files
         $files = $this->sorter->sort($foundFiles);
 
-        return $this->join($files, $output);
+        $this->join($files, $output);
     }
 
     /**
      * Joins a list of PDFs (represented by SplFileInfo instances) to one file.
      *
-     * @param SplFileInfo[] $files
-     * @param string        $output
+     * @param SplFileInfo[]|SymfonySplFileInfo[] $files Either array or ArrayObject
      *
      * @throws JoinException if the PDF join fails
      */
-    public function join($files, $output)
+    public function join($files, string $output): void
     {
         $filePaths = [];
         foreach ($files as $file) {
-            $filePaths[] = escapeshellarg($file->getPathname());
+            $filePaths[] = $file->getPathname();
         }
 
-        $fileList = implode(' ', $filePaths);
-
-        $commandLine = sprintf('%s %s cat output %s', $this->wrapper->getBinary(), $fileList, escapeshellarg($output));
-
-        /**
-         * @var Process
-         */
-        $process = $this->wrapper->createProcess($commandLine);
-
         try {
-            $process->mustRun();
-        } catch (Exception $e) {
+            $this->wrapper->join($filePaths, $output);
+        } catch (PdfException $e) {
             throw new JoinException(
                 sprintf('Failed to join PDF "%s"! Error: %s', $output, $e->getMessage()),
                 0,
                 $e,
-                $process->getErrorOutput(),
-                $process->getOutput()
+                $e->getPdfError(),
+                $e->getPdfOutput()
             );
         }
-
-        $process->getOutput();
     }
 
     /**
      * Finds all files inside the folder with specific pattern.
      *
-     * @param string $folder
-     * @param string $pattern
-     *
      * @return SplFileInfo[]
      */
-    private function getFiles($folder, $pattern)
+    private function getFiles(string $folder, string $pattern): array
     {
         $files = $this->finder->files()->name($pattern)->in($folder);
 

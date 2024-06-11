@@ -2,7 +2,7 @@
 /**
  * PDFtk wrapper
  *
- * @copyright 2014-2019 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -25,18 +25,26 @@ class Pages
     private $pages = [];
 
     /**
-     * @var PdftkWrapper
+     * @var WrapperInterface
      */
     private $wrapper;
 
     /**
      * Constructor.
-     *
-     * @param PdftkWrapper $wrapper
      */
-    public function __construct(PdftkWrapper $wrapper = null)
+    public function __construct(WrapperInterface $wrapper = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
+    }
+
+    /**
+     * Add page to the pages array.
+     */
+    public function add(Page $page): self
+    {
+        $this->pages[] = $page;
+
+        return $this;
     }
 
     /**
@@ -44,17 +52,15 @@ class Pages
      *
      * @return Page[]
      */
-    public function all()
+    public function all(): array
     {
         return $this->pages;
     }
 
     /**
      * Remove all pages.
-     *
-     * @return self
      */
-    public function clear()
+    public function clear(): self
     {
         $this->pages = [];
 
@@ -64,48 +70,11 @@ class Pages
     /**
      * Imports pages from a PDF file.
      *
-     * @param string $infile
-     *
-     * @return self
+     * @throws PdfException
      */
-    public function import($infile)
+    public function import(string $infile): self
     {
-        $dump = $this->wrapper->getPdfDataDump($infile);
-        $this->importFromDump($dump);
-
-        return $this;
-    }
-
-    /**
-     * Imports page meta data from a pdftk dump.
-     *
-     * @param string $dump
-     *
-     * @return $this
-     */
-    public function importFromDump($dump)
-    {
-        $matches = [];
-        $regex = '/PageMediaBegin\nPageMediaNumber: (?<page>.+)\nPageMediaRotation: (?<rotation>[0-9]+)\n' .
-                 'PageMediaRect: .*\n' .
-                 'PageMediaDimensions: (?<dim>(([0-9]\,)?[0-9]+(\.[0-9]+)?) (([0-9]\,)?[0-9]+(\.[0-9]+)?))/';
-        preg_match_all($regex, $dump, $matches, PREG_SET_ORDER);
-
-        $this->pages = [];
-        foreach ($matches as $p) {
-            $page = new Page();
-
-            $dimensions = explode(' ', $p['dim']);
-
-            $page
-                ->setPageNumber((int) $p['page'])
-                ->setRotation((int) $p['rotation'])
-                ->setWidth((float) str_replace(',', '', $dimensions[0]))
-                ->setHeight((float) str_replace(',', '', $dimensions[1]))
-            ;
-
-            $this->pages[] = $page;
-        }
+        $this->wrapper->importPages($this, $infile);
 
         return $this;
     }

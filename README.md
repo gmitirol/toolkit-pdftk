@@ -8,7 +8,7 @@ The current build status and code analysis can be found here:
 
 Requirements
 ------------
-* PHP 5.6.0 or higher
+* PHP 7.1.0 or higher
 * mbstring extension
 * pdftk
 
@@ -17,7 +17,7 @@ Installation
 The recommended way to install toolkit-pdftk is via composer.
 ```json
 "require": {
-    "gmi/toolkit-pdftk": "2.2.*"
+    "gmi/toolkit-pdftk": "3.0.*"
 }
 ```
 

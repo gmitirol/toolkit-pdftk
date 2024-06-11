@@ -1,6 +1,6 @@
 <?php
 /**
- * File not found exception.
+ * Not implemented exception.
  *
  * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
@@ -13,8 +13,8 @@
 namespace Gmi\Toolkit\Pdftk\Exception;
 
 /**
- * This exception should be thrown if required files can't be found.
+ * This exception should be thrown if a PDF tool implementation does not support the requested operation.
  */
-class FileNotFoundException extends PdfException
+class NotImplementedException extends PdfException
 {
 }
