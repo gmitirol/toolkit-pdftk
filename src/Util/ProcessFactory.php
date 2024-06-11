@@ -32,7 +32,10 @@ class ProcessFactory
      */
     public function createProcess(string $commandLine, int $timeout = self::PROCESS_DEFAULT_TIMEOUT): Process
     {
-        // support old (Symfony 2.7 to 4.1) and new (Symfony 4.2+) syntax to build Symfony Process instances.
+        /**
+         * Support old (Symfony 2.7 to 4.1) and new (Symfony 4.2+) syntax to build Symfony Process instances.
+         * @psalm-suppress InvalidArgument Psalm can only analyze the file of the currently used Symfony version
+         */
         $process = $this->useNewSyntax() ? Process::fromShellCommandline($commandLine) : new Process($commandLine);
         $process->setTimeout($timeout);
 

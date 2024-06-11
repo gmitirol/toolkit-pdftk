@@ -15,6 +15,8 @@ namespace Gmi\Toolkit\Pdftk;
 
 /**
  * Represents a single PDF bookmark.
+ *
+ * @psalm-suppress MissingConstructor
  */
 class Bookmark
 {

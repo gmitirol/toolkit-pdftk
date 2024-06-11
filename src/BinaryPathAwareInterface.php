@@ -21,8 +21,11 @@ interface BinaryPathAwareInterface
      * Set tool binary to use.
      *
      * @throws FileNotFoundException
+     * @psalm-suppress MissingReturnType The method may return void, or self to provide a fluent interface.
+     *                 The default implementation BinaryPathAwareTrait does the latter and returns self, which is the
+     *                 implementing class and not the trait itself. This cannot be modeled with Psalm on PHP 7.x.
      */
-    public function setBinary(string $binary);
+    public function setBinary(string $binaryPath);
 
     /**
      * Get current used tool binary.

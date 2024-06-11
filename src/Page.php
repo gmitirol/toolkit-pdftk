@@ -14,6 +14,8 @@ namespace Gmi\Toolkit\Pdftk;
 
 /**
  * Represents a single PDF page.
+ *
+ * @psalm-suppress MissingConstructor
  */
 class Page
 {

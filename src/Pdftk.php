@@ -57,7 +57,7 @@ class Pdftk
      *
      * @throws PdfException
      */
-    public function __construct($options = [], WrapperInterface $wrapper = null)
+    public function __construct(array $options = [], WrapperInterface $wrapper = null)
     {
         $this->wrapper = $wrapper ?: new PdftkWrapper();
 
@@ -175,7 +175,7 @@ class Pdftk
     public function apply(string $infile, string $outfile = null): self
     {
         $this->bookmarks->apply($infile, $outfile);
-        $this->metadata->apply($outfile);
+        $this->metadata->apply($outfile ?? $infile);
 
         return $this;
     }

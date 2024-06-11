@@ -113,6 +113,7 @@ class PdftkTest extends TestCase
         $this->assertSame(1, $pdftkGet->bookmarks()->all()[3]->getPageNumber());
         $this->assertSame(2, $pdftkGet->bookmarks()->all()[3]->getLevel());
         $this->assertSame('Section 3', $pdftkGet->bookmarks()->all()[3]->getTitle());
+        $this->assertSame('Jane Doe & Erika Mustermann', $pdftkGet->metadata()->get('Author'));
 
         unlink($target);
     }

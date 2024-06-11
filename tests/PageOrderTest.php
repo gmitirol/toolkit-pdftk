@@ -24,6 +24,23 @@ use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PageOrderTest extends TestCase
 {
+
+    public function testReorderEmptyPageNumbers()
+    {
+        $mockWrapper = $this->createMock(PdftkWrapper::class);
+        $mockWrapper->expects($this->never())
+                    ->method('importPages');
+        $mockWrapper->expects($this->never())
+                    ->method('reorder');
+
+        $pageOrder = new PageOrder($mockWrapper);
+
+        $this->expectException(ReorderException::class);
+        $this->expectExceptionMessage('Failed to reorder PDF "example.pdf"! Error: Empty page order!');
+
+        $pageOrder->reorder('example.pdf', [], 'output.pdf');
+    }
+
     public function testReorderIncorrectPageNumbers()
     {
         $mockWrapper = $this->createMock(PdftkWrapper::class);

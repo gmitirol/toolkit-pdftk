@@ -164,7 +164,7 @@ class PdfcpuWrapperBookmarksHelper
     /**
      * Recursively traverse the bookmarks array and add the bookmarks appropriately.
      */
-    private function parseBookmarksTree(Bookmarks $bookmarks, array $arr, int $level = 1)
+    private function parseBookmarksTree(Bookmarks $bookmarks, array $arr, int $level = 1): void
     {
         foreach ($arr as $current) {
             $bookmark = new Bookmark();
@@ -196,7 +196,7 @@ class PdfcpuWrapperBookmarksHelper
     /**
      * Recursively build the JSON tree based on the normalized bookmarks array.
      */
-    private function buildBookmarksTree(array $bookmarksArray, $parentId = null): array
+    private function buildBookmarksTree(array $bookmarksArray, int $parentId = null): array
     {
         $result = [];
 

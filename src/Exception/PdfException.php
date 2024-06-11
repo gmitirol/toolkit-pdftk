@@ -21,12 +21,12 @@ use Exception;
 class PdfException extends Exception
 {
     /**
-     * @var string
+     * @var string|null
      */
     private $pdfError;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $pdfOutput;
 
@@ -49,7 +49,7 @@ class PdfException extends Exception
     /**
      * Returns the concrete error message of the underlying PDF library.
      */
-    public function getPdfError()
+    public function getPdfError(): ?string
     {
         return $this->pdfError;
     }
@@ -57,7 +57,7 @@ class PdfException extends Exception
     /**
      * Returns the concrete output of the underlying PDF library.
      */
-    public function getPdfOutput()
+    public function getPdfOutput(): ?string
     {
         return $this->pdfOutput;
     }

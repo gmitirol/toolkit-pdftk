@@ -14,6 +14,7 @@
 namespace Gmi\Toolkit\Pdftk;
 
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo as SymfonySplFileInfo;
 
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\JoinException;
@@ -67,7 +68,7 @@ class Joiner
      * @throws FileNotFoundException if no matching input files are found in the input folder
      * @throws JoinException if the PDF join fails
      */
-    public function joinByPattern(string $inputFolder, string $pattern, string $output)
+    public function joinByPattern(string $inputFolder, string $pattern, string $output): void
     {
         // array of files which match the pattern
         $foundFiles = $this->getFiles($inputFolder, $pattern);
@@ -85,13 +86,13 @@ class Joiner
         // array of sorted files
         $files = $this->sorter->sort($foundFiles);
 
-        return $this->join($files, $output);
+        $this->join($files, $output);
     }
 
     /**
      * Joins a list of PDFs (represented by SplFileInfo instances) to one file.
      *
-     * @param SplFileInfo[] $files Either array or ArrayObject
+     * @param SplFileInfo[]|SymfonySplFileInfo[] $files Either array or ArrayObject
      *
      * @throws JoinException if the PDF join fails
      */

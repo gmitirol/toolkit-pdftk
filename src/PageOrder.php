@@ -73,6 +73,10 @@ class PageOrder
      */
     private function checkOrderHasCorrectPageNumbers(array $order): void
     {
+        if (0 === count($order)) {
+            throw new ReorderException('Empty page order!');
+        }
+
         $expected = range(1, max($order));
         if (array_diff($order, $expected) !== [] || array_diff($expected, $order) !== []) {
             throw new ReorderException('Invalid page order!');

@@ -22,7 +22,7 @@ class FileChecker
     /**
      * Checks whether a file exists.
      */
-    public function checkFileExists(string $file, string $message = 'File "%s" not found!')
+    public function checkFileExists(string $file, string $message = 'File "%s" not found!'): void
     {
         $exceptionMessage = (false !== strpos($message, '%s')) ? sprintf($message, $file) : $message;
 
@@ -34,8 +34,8 @@ class FileChecker
     /**
      * Checks whether a PDF file exists.
      */
-    public function checkPdfFileExists(string $file)
+    public function checkPdfFileExists(string $file): void
     {
-        return $this->checkFileExists($file, 'PDF "%s" not found!');
+        $this->checkFileExists($file, 'PDF "%s" not found!');
     }
 }

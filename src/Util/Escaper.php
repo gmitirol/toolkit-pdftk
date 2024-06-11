@@ -21,13 +21,13 @@ class Escaper
 {
     /**
      *
-     * @var string|bool The best detected UTF-8 locale, or true if there was already a UTF-8 locale set.
+     * @var string|true The best detected UTF-8 locale, or true if there was already a UTF-8 locale set.
      */
-    private $locale = false;
+    private $locale = '';
 
     /**
      *
-     * @param string[] UTF-8 aware locales which should be used, in order of preference.
+     * @param string[] $utf8Locales UTF-8 aware locales which should be used, in order of preference.
      *
      * @throws Exception if no
      */
@@ -46,6 +46,8 @@ class Escaper
      */
     public function escapeshellarg(string $arg): string
     {
+        $previousLocale = null;
+
         if (true !== $this->locale) {
             $previousLocale = setlocale(LC_CTYPE, 0);
             setlocale(LC_CTYPE, $this->locale);
@@ -65,6 +67,8 @@ class Escaper
      */
     public function escapeshellcmd(string $command): string
     {
+        $previousLocale = '';
+
         if (true !== $this->locale) {
             $previousLocale = setlocale(LC_CTYPE, 0);
             setlocale(LC_CTYPE, $this->locale);
@@ -95,7 +99,7 @@ class Escaper
         return $this->escapeshellcmd($arg);
     }
 
-    private function initializeUtf8Locale($utf8Locales)
+    private function initializeUtf8Locale(array $utf8Locales): void
     {
         // with 0 as the second argument, setlocale() returns the current locale
         $previousLocale = setlocale(LC_CTYPE, 0);

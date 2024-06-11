@@ -49,13 +49,13 @@ class Metadata
     /**
      * Set metadata key/value.
      *
-     * @throws PdftkException
+     * @throws PdfException
      */
     public function set(string $key, string $value): self
     {
         $this->checkKey($key);
 
-        $this->metadata[$key] = (string) $value;
+        $this->metadata[$key] = $value;
 
         return $this;
     }
@@ -65,7 +65,7 @@ class Metadata
      *
      * @return string|bool
      *
-     * @throws PdftkException
+     * @throws PdfException
      */
     public function get(string $key)
     {
@@ -81,7 +81,7 @@ class Metadata
     /**
      * Unset metadata for key.
      *
-     * @throws PdftkException
+     * @throws PdfException
      */
     public function remove(string $key): self
     {
@@ -95,7 +95,7 @@ class Metadata
     /**
      * Checks whether a key is set.
      *
-     * @throws PdftkException
+     * @throws PdfException
      */
     public function has(string $key): bool
     {
@@ -135,7 +135,7 @@ class Metadata
     /**
      * Apply metadata to file.
      *
-     * @throws PdftkException
+     * @throws PdfException
      */
     public function apply(string $infile, string $outfile = null): self
     {
@@ -163,7 +163,7 @@ class Metadata
      */
     private function checkKey(string $key): void
     {
-        if (!is_string($key) || empty($key)) {
+        if (empty($key)) {
             throw new PdfException(sprintf('Invalid key name "%s"!', $key));
         }
     }

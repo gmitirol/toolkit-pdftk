@@ -60,7 +60,7 @@ class Bookmarks
             throw new PdfException(sprintf('Invalid bookmark level: %s', $bookmark->getLevel()));
         }
 
-        if (!is_int($bookmark->getPageNumber()) || $bookmark->getPageNumber() < 1) {
+        if ($bookmark->getPageNumber() < 1) {
             throw new PdfException(sprintf('Invalid page number: %s', $bookmark->getPageNumber()));
         } elseif ($this->maxpage > 0 && $bookmark->getPageNumber() > $this->maxpage) {
             throw new PdfException('Page number out of range!');

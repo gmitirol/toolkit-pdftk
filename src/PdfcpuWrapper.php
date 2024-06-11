@@ -26,6 +26,8 @@ use Exception;
  * Wrapper for pdfcpu.
  *
  * @internal Only the methods exposed by the interfaces should be accessed from outside.
+ *
+ * @psalm-suppress PropertyNotSetInConstructor as $binaryPath is defined and set in the BinaryPathAwareTrait
  */
 class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
 {

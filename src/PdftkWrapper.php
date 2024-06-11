@@ -27,6 +27,8 @@ use Exception;
  * Wrapper for PDFtk.
  *
  * @internal Only the methods exposed by the interfaces should be accessed from outside.
+ *
+ * @psalm-suppress PropertyNotSetInConstructor as $binaryPath is defined and set in the BinaryPathAwareTrait
  */
 class PdftkWrapper implements WrapperInterface, BinaryPathAwareInterface
 {
