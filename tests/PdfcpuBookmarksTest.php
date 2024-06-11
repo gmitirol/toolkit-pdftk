@@ -139,7 +139,7 @@ class PdfcpuBookmarksTest extends TestCase
                     ->method('getOutput')
                     ->willReturn($pdfOutputMessage);
 
-        $regex = sprintf("|^'%s' bookmarks import '%s' '[a-zA-Z0-9/]+\.json' '%s'$|", $binary, $pdf, $outfile);
+        $regex = sprintf("|^'%s' bookmarks import -replace '%s' '[a-zA-Z0-9/]+\.json' '%s'$|", $binary, $pdf, $outfile);
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
                            ->method('createProcess')
@@ -173,7 +173,7 @@ class PdfcpuBookmarksTest extends TestCase
         $mockProcess->expects($this->once())
                     ->method('mustRun');
 
-        $regex = sprintf("|^'%s' bookmarks import '%s' '[a-zA-Z0-9/]+\.json' '%s'$|", $binary, $pdf, $outfile);
+        $regex = sprintf("|^'%s' bookmarks import -replace '%s' '[a-zA-Z0-9/]+\.json' '%s'$|", $binary, $pdf, $outfile);
 
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())

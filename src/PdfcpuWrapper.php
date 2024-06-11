@@ -15,7 +15,6 @@ namespace Gmi\Toolkit\Pdftk;
 use Symfony\Component\Process\Process;
 
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
-use Gmi\Toolkit\Pdftk\Exception\NotImplementedException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Util\Escaper;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
@@ -192,7 +191,7 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
         }
 
         $cmd = sprintf(
-            '%s bookmarks import %s %s %s',
+            '%s bookmarks import -replace %s %s %s',
             $this->getBinary(),
             $this->escaper->shellArg($infile),
             $this->escaper->shellArg($tempfile),

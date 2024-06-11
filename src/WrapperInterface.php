@@ -46,6 +46,7 @@ interface WrapperInterface
 
     /**
      * Applies the provided Bookmarks instance to an PDF file $infile using an $outfile as target.
+     * Existing bookmarks are overwritten.
      *
      * If $outfile is null, the $infile is overwritten after successful application instead.
      */
