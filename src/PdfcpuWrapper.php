@@ -17,6 +17,7 @@ use Symfony\Component\Process\Process;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Util\Escaper;
+use Gmi\Toolkit\Pdftk\Util\FileChecker;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
@@ -45,6 +46,11 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
     private $escaper;
 
     /**
+     * @var FileChecker
+     */
+    private $fileChecker;
+
+    /**
      * Constructor.
      *
      * @throws FileNotFoundException
@@ -54,6 +60,7 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
         $this->setBinary($pdftkBinary ?: $this->guessBinary(PHP_OS));
         $this->processFactory = $processFactory ?: new ProcessFactory();
         $this->escaper = new Escaper();
+        $this->fileChecker = new FileChecker();
     }
 
     /**
@@ -180,7 +187,7 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
     {
         $temporaryOutFile = false;
 
-        $this->checkPdfFileExists($infile);
+        $this->fileChecker->checkPdfFileExists($infile);
         $bookmarksJson = $this->exportBookmarksToJson($bookmarks);
         $tempfile = tempnam(sys_get_temp_dir(), 'bookmarks') . '.json';
         file_put_contents($tempfile, $bookmarksJson);
@@ -233,7 +240,7 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
     {
         $tempBookmarksFile = tempnam(sys_get_temp_dir(), 'bookmarks') . '.json';
 
-        $this->checkPdfFileExists($infile);
+        $this->fileChecker->checkPdfFileExists($infile);
 
         $cmd = sprintf(
             '%s bookmarks export %s %s',
@@ -273,7 +280,7 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
      */
     public function importPages(Pages $pages, string $infile): self
     {
-        $this->checkPdfFileExists($infile);
+        $this->fileChecker->checkPdfFileExists($infile);
 
         $cmd = sprintf('%s info -pages 1- -j %s', $this->getBinary(), $this->escaper->shellArg($infile));
 
@@ -328,7 +335,7 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
     {
         $temporaryOutFile = false;
 
-        $this->checkPdfFileExists($infile);
+        $this->fileChecker->checkPdfFileExists($infile);
 
         $properties = [];
         foreach ($metadata->all() as $key => $value) {
@@ -408,16 +415,6 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
         }
 
         return $this;
-    }
-
-    /**
-     * Checks whether a PDF file exists.
-     */
-    private function checkPdfFileExists($file)
-    {
-        if (!file_exists($file)) {
-            throw new FileNotFoundException(sprintf('PDF "%s" not found', $file));
-        }
     }
 
     /**

@@ -14,6 +14,7 @@
 namespace Gmi\Toolkit\Pdftk;
 
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
+use Gmi\Toolkit\Pdftk\Util\FileChecker;
 
 /**
  * @internal
@@ -32,9 +33,8 @@ trait BinaryPathAwareTrait
      */
     public function setBinary(string $binaryPath): self
     {
-        if (!file_exists($binaryPath)) {
-            throw new FileNotFoundException(sprintf('Binary "%s" not found', $binaryPath));
-        }
+        $fileChecker = new FileChecker();
+        $fileChecker->checkFileExists($binaryPath, 'Binary "%s" not found!');
 
         $this->binaryPath = $binaryPath;
 

@@ -18,6 +18,7 @@ use Symfony\Component\Process\Process;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Util\Escaper;
+use Gmi\Toolkit\Pdftk\Util\FileChecker;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
@@ -42,6 +43,11 @@ class PdftkWrapper implements WrapperInterface, BinaryPathAwareInterface
     private $escaper;
 
     /**
+     * @var FileChecker
+     */
+    private $fileChecker;
+
+    /**
      * Constructor.
      *
      * @throws FileNotFoundException
@@ -51,6 +57,7 @@ class PdftkWrapper implements WrapperInterface, BinaryPathAwareInterface
         $this->setBinary($pdftkBinary ?: $this->guessBinary(PHP_OS));
         $this->processFactory = $processFactory ?: new ProcessFactory();
         $this->escaper = new Escaper();
+        $this->fileChecker = new FileChecker();
     }
 
     /**
@@ -222,9 +229,7 @@ class PdftkWrapper implements WrapperInterface, BinaryPathAwareInterface
      */
     public function getPdfDataDump(string $pdf): string
     {
-        if (!file_exists($pdf)) {
-            throw new FileNotFoundException(sprintf('PDF "%s" not found!', $pdf));
-        }
+        $this->fileChecker->checkPdfFileExists($pdf);
 
         $esc = $this->escaper;
 
@@ -273,9 +278,7 @@ class PdftkWrapper implements WrapperInterface, BinaryPathAwareInterface
     {
         $temporaryOutFile = false;
 
-        if (!file_exists($pdf)) {
-            throw new FileNotFoundException(sprintf('PDF "%s" not found', $pdf));
-        }
+        $this->fileChecker->checkPdfFileExists($pdf);
 
         if ($outfile === null || $pdf === $outfile) {
             $temporaryOutFile = true;
