@@ -22,7 +22,7 @@ use Symfony\Component\Process\Process;
  */
 class ProcessFactory
 {
-    const PROCESS_DEFAULT_TIMEOUT = 300;
+    const PROCESS_DEFAULT_TIMEOUT = 600;
 
     /**
      * Creates a process from command line.
