@@ -256,12 +256,7 @@ abstract class AbstractPdfcpuWrapper implements WrapperInterface, BinaryPathAwar
             throw $exception;
         }
 
-        /**
-         * Remove invalid JSON (useless line with the page numbers at the beginning)
-         * @todo Remove when pdfcpu does not emit the extra pages line before JSON anymore
-         */
-        $outputCleaned = preg_replace('/^pages: (\d,?)+$/mu', '', $process->getOutput());
-        $infoRaw = json_decode($outputCleaned, true);
+        $infoRaw = $this->decodeInfoJson($process->getOutput());
 
         $pageBoundaries = $infoRaw['infos'][0]['pageBoundaries'];
 
@@ -355,7 +350,7 @@ abstract class AbstractPdfcpuWrapper implements WrapperInterface, BinaryPathAwar
             );
         }
 
-        $raw = json_decode($process->getOutput(), true);
+        $raw = $this->decodeInfoJson($process->getOutput());
         $metadataArray = $raw['infos'][0];
 
         foreach (self::SUPPORTED_METADATA_ATTRIBUTES as $attribute) {
@@ -371,5 +366,22 @@ abstract class AbstractPdfcpuWrapper implements WrapperInterface, BinaryPathAwar
         }
 
         return $this;
+    }
+
+    /**
+     * Decodes the JSON payload from a pdfcpu `info -j` invocation.
+     *
+     * pdfcpu may prepend non-JSON lines to stdout: v0.11 emits a `pages: 1,2,…` summary, and v0.12 prints
+     * a multi-line configuration-mismatch banner when the user's config dir is out of sync. Both pollute
+     * the start of the output, so this helper skips to the first `{` before decoding.
+     */
+    private function decodeInfoJson(string $output): array
+    {
+        $start = strpos($output, '{');
+        if ($start === false) {
+            return [];
+        }
+
+        return json_decode(substr($output, $start), true) ?? [];
     }
 }
