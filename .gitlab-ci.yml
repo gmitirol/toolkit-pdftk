@@ -5,21 +5,32 @@ stages:
 build_pdfcpu:
   image: debian:12-slim
   stage: build
+  variables:
+    GO_VERSION: "1.26.1"
   script:
     - apt update
     - apt install -y wget git
     - cd /
-    - wget 'https://go.dev/dl/go1.22.1.linux-amd64.tar.gz'
-    - tar xzf go1.22.1.linux-amd64.tar.gz
-    - cd /root
-    - git clone https://github.com/pdfcpu/pdfcpu
-    - cd pdfcpu/cmd/pdfcpu
-    - /go/bin/go install
-    - /root/go/bin/pdfcpu version
-    - cp /root/go/bin/pdfcpu $CI_PROJECT_DIR/
+    - wget "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+    - tar xzf "go${GO_VERSION}.linux-amd64.tar.gz"
+    - git clone https://github.com/pdfcpu/pdfcpu /root/pdfcpu
+    # Build v0.11.1 (legacy CLI with single-dash long flags)
+    - cd /root/pdfcpu && git checkout v0.11.1
+    - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu_0.11.1"
+    - '"$CI_PROJECT_DIR/pdfcpu_0.11.1" version'
+    # Build v0.12.1 (Cobra-based CLI with POSIX-style long flags)
+    - cd /root/pdfcpu && git checkout v0.12.1
+    - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu_0.12.1"
+    - '"$CI_PROJECT_DIR/pdfcpu_0.12.1" version'
+    # Build current master (drives the version-agnostic high-level tests)
+    - cd /root/pdfcpu && git checkout master
+    - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu"
+    - '"$CI_PROJECT_DIR/pdfcpu" version'
   artifacts:
     paths:
       - $CI_PROJECT_DIR/pdfcpu
+      - $CI_PROJECT_DIR/pdfcpu_0.11.1
+      - $CI_PROJECT_DIR/pdfcpu_0.12.1
   tags:
       - shared
 
@@ -39,6 +50,8 @@ build_pdfcpu:
     COMPOSER_HOME: "$CI_PROJECT_DIR/build/.composer"
   script:
     - cp $CI_PROJECT_DIR/pdfcpu /usr/bin/pdfcpu
+    - cp $CI_PROJECT_DIR/pdfcpu_0.11.1 /usr/local/bin/pdfcpu_0.11.1
+    - cp $CI_PROJECT_DIR/pdfcpu_0.12.1 /usr/local/bin/pdfcpu_0.12.1
     - apk add --no-cache --update pdftk
     - php-ext.sh enable 'xdebug'
     - composer install --no-progress
