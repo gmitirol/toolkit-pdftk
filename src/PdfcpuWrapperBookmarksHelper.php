@@ -54,7 +54,7 @@ class PdfcpuWrapperBookmarksHelper
     /**
      * Constructor.
      *
-     * @param string $replaceFlag CLI token for the bookmark-replace flag (version-specific, e.g. `-replace` or `--replace`)
+     * @param string $replaceFlag CLI flag to replace existing bookmarks (e.g. `-replace` or `--replace`)
      *
      * @throws FileNotFoundException
      */
