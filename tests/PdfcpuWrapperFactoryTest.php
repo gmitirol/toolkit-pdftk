@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\PdfcpuV12Wrapper;
 use Gmi\Toolkit\Pdftk\PdfcpuWrapperFactory;
+use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
@@ -154,6 +155,16 @@ class PdfcpuWrapperFactoryTest extends TestCase
             'missing v prefix' => ["pdfcpu: 0.12.1\n"],
             'version not at line start' => ['the pdfcpu: v0.12.1 string'],
         ];
+    }
+
+    public function testCreateThrowsWhenBinaryDoesNotExist()
+    {
+        $missing = __DIR__ . '/Fixtures/missing.sh';
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage(sprintf('Binary "%s" not found!', $missing));
+
+        PdfcpuWrapperFactory::create($missing);
     }
 
     public function testCreateUsesRealBinaryWhenNoProcessFactoryGiven()

@@ -14,7 +14,9 @@ namespace Gmi\Toolkit\Pdftk;
 
 use Symfony\Component\Process\Process;
 
+use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
+use Gmi\Toolkit\Pdftk\Util\FileChecker;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
@@ -30,6 +32,7 @@ final class PdfcpuWrapperFactory
     /**
      * Instantiates the wrapper matching the version reported by the pdfcpu binary.
      *
+     * @throws FileNotFoundException if the binary cannot be located
      * @throws PdfException if the version cannot be detected or parsed
      */
     public static function create(
@@ -38,6 +41,8 @@ final class PdfcpuWrapperFactory
     ): AbstractPdfcpuWrapper {
         $resolvedBinary = $binary ?: self::guessBinary(PHP_OS);
         $resolvedProcessFactory = $processFactory ?: new ProcessFactory();
+
+        (new FileChecker())->checkFileExists($resolvedBinary, 'Binary "%s" not found!');
 
         $version = self::detectVersion($resolvedBinary, $resolvedProcessFactory);
 

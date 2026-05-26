@@ -195,7 +195,11 @@ class PdfcpuV11BookmarksTest extends TestCase
         $source = __DIR__ . '/Fixtures/empty.pdf';
         $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
-        $wrapper = new PdfcpuV11Wrapper();
+        $binary = '/usr/local/bin/pdfcpu_0.11.1';
+        if (!is_executable($binary)) {
+            $this->markTestSkipped(sprintf('pdfcpu v0.11 binary not found at %s', $binary));
+        }
+        $wrapper = new PdfcpuV11Wrapper($binary);
 
         $bookmark = new Bookmark();
         $bookmark
@@ -227,7 +231,11 @@ class PdfcpuV11BookmarksTest extends TestCase
         $source = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
         copy(__DIR__ . '/Fixtures/empty.pdf', $source);
 
-        $wrapper = new PdfcpuV11Wrapper();
+        $binary = '/usr/local/bin/pdfcpu_0.11.1';
+        if (!is_executable($binary)) {
+            $this->markTestSkipped(sprintf('pdfcpu v0.11 binary not found at %s', $binary));
+        }
+        $wrapper = new PdfcpuV11Wrapper($binary);
 
         $bookmark = new Bookmark();
         $bookmark
