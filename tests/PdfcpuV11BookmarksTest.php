@@ -18,12 +18,12 @@ use PHPUnit\Framework\TestCase;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Bookmark;
 use Gmi\Toolkit\Pdftk\Bookmarks;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
-class PdfcpuBookmarksTest extends TestCase
+class PdfcpuV11BookmarksTest extends TestCase
 {
     public function testImportBookmarksException()
     {
@@ -52,7 +52,7 @@ class PdfcpuBookmarksTest extends TestCase
                            ->with($this->stringStartsWith(sprintf('\'%s\' bookmarks export \'%s\'', $binary, $pdf)))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $bookmarks = new Bookmarks();
 
         try {
@@ -83,7 +83,7 @@ class PdfcpuBookmarksTest extends TestCase
                            ->with($this->stringStartsWith(sprintf('\'%s\' bookmarks export \'%s\'', $binary, $pdf)))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $bookmarks = new Bookmarks();
 
         $pdfcpu->importBookmarks($bookmarks, $pdf);
@@ -110,7 +110,7 @@ class PdfcpuBookmarksTest extends TestCase
                            ->with($this->stringStartsWith(sprintf('\'%s\' bookmarks export \'%s\'', $binary, $pdf)))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $bookmarks = new Bookmarks();
 
         $pdfcpu->importBookmarks($bookmarks, $pdf);
@@ -146,7 +146,7 @@ class PdfcpuBookmarksTest extends TestCase
                            ->with($this->matchesRegularExpression($regex))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $bookmarks = new Bookmarks();
 
         try {
@@ -181,7 +181,7 @@ class PdfcpuBookmarksTest extends TestCase
                            ->with($this->matchesRegularExpression($regex))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $bookmarks = new Bookmarks();
 
         $pdfcpu->applyBookmarks($bookmarks, $pdf, $outfile);
@@ -195,7 +195,7 @@ class PdfcpuBookmarksTest extends TestCase
         $source = __DIR__ . '/Fixtures/empty.pdf';
         $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
-        $wrapper = new PdfcpuWrapper();
+        $wrapper = new PdfcpuV11Wrapper();
 
         $bookmark = new Bookmark();
         $bookmark
@@ -227,7 +227,7 @@ class PdfcpuBookmarksTest extends TestCase
         $source = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
         copy(__DIR__ . '/Fixtures/empty.pdf', $source);
 
-        $wrapper = new PdfcpuWrapper();
+        $wrapper = new PdfcpuV11Wrapper();
 
         $bookmark = new Bookmark();
         $bookmark

@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Gmi\Toolkit\Pdftk\Metadata;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 use Gmi\Toolkit\PdfTk\Exception\PdfException;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PdftkMetadataTest extends TestCase
@@ -225,7 +225,7 @@ class PdftkMetadataTest extends TestCase
     {
         return [
             [new PdftkWrapper()],
-            [new PdfcpuWrapper()],
+            [new PdfcpuV11Wrapper()],
         ];
     }
 }

@@ -47,16 +47,24 @@ class PdfcpuWrapperBookmarksHelper
     private $fileChecker;
 
     /**
+     * @var string
+     */
+    private $replaceFlag;
+
+    /**
      * Constructor.
+     *
+     * @param string $replaceFlag CLI token for the bookmark-replace flag (version-specific, e.g. `-replace` or `--replace`)
      *
      * @throws FileNotFoundException
      */
-    public function __construct(string $pdftkBinaryPath, ProcessFactory $processFactory)
+    public function __construct(string $pdftkBinaryPath, ProcessFactory $processFactory, string $replaceFlag)
     {
         $this->binaryPath = $pdftkBinaryPath;
         $this->processFactory = $processFactory;
         $this->escaper = new Escaper();
         $this->fileChecker = new FileChecker();
+        $this->replaceFlag = $replaceFlag;
     }
 
     /**
@@ -77,8 +85,9 @@ class PdfcpuWrapperBookmarksHelper
         }
 
         $cmd = sprintf(
-            '%s bookmarks import -replace %s %s %s',
+            '%s bookmarks import %s %s %s %s',
             $this->getBinary(),
+            $this->replaceFlag,
             $this->escaper->shellArg($infile),
             $this->escaper->shellArg($tempfile),
             $this->escaper->shellArg($outfile)

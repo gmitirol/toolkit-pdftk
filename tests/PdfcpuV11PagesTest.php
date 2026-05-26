@@ -17,12 +17,12 @@ use PHPUnit\Framework\TestCase;
 
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Pages;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
-class PdfcpuPagesTest extends TestCase
+class PdfcpuV11PagesTest extends TestCase
 {
     public function testImportPagesException()
     {
@@ -51,7 +51,7 @@ class PdfcpuPagesTest extends TestCase
                            ->with(sprintf('\'%s\' info -pages 1- -j \'%s\'', $binary, $pdf))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $pages = new Pages();
 
         try {
@@ -117,7 +117,7 @@ EOT;
                            ->with(sprintf('\'%s\' info -pages 1- -j \'%s\'', $binary, $pdf))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $pages = new Pages();
 
         $pdfcpu->importPages($pages, $pdf);
@@ -194,7 +194,7 @@ EOT;
                            ->with(sprintf('\'%s\' info -pages 1- -j \'%s\'', $binary, $pdf))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $pages = new Pages();
 
         $pdfcpu->importPages($pages, $pdf);

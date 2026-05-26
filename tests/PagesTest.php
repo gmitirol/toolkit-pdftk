@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 use Gmi\Toolkit\Pdftk\Pages;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PagesTest extends TestCase
@@ -134,7 +134,7 @@ class PagesTest extends TestCase
     {
         return [
             [new PdftkWrapper()],
-            [new PdfcpuWrapper()],
+            [new PdfcpuV11Wrapper()],
         ];
     }
 }

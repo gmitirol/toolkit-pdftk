@@ -19,7 +19,7 @@ use Gmi\Toolkit\Pdftk\Exception\ReorderException;
 use Gmi\Toolkit\Pdftk\Page;
 use Gmi\Toolkit\Pdftk\Pages;
 use Gmi\Toolkit\Pdftk\PageOrder;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class PageOrderTest extends TestCase
@@ -160,7 +160,7 @@ class PageOrderTest extends TestCase
     {
         return [
             [new PdftkWrapper()],
-            [new PdfcpuWrapper()],
+            [new PdfcpuV11Wrapper()],
         ];
     }
 }

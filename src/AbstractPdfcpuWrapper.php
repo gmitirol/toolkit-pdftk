@@ -1,6 +1,6 @@
 <?php
 /**
- * pdfcpu wrapper
+ * pdfcpu wrapper base class
  *
  * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
@@ -23,15 +23,27 @@ use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 use Exception;
 
 /**
- * Wrapper for pdfcpu.
+ * Abstract base class for pdfcpu wrappers.
+ *
+ * Concrete subclasses provide version-specific CLI flag tokens via the PAGES_FLAG and REPLACE_FLAG constants.
  *
  * @internal Only the methods exposed by the interfaces should be accessed from outside.
  *
  * @psalm-suppress PropertyNotSetInConstructor as $binaryPath is defined and set in the BinaryPathAwareTrait
  */
-class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
+abstract class AbstractPdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
 {
     use BinaryPathAwareTrait;
+
+    /**
+     * Long-form flag for selecting pages on `collect` / `info`. Subclasses must override.
+     */
+    protected const PAGES_FLAG = '';
+
+    /**
+     * Long-form flag for replacing existing bookmarks on `bookmarks import`. Subclasses must override.
+     */
+    protected const REPLACE_FLAG = '';
 
     private const SUPPORTED_METADATA_ATTRIBUTES = [
         'Title', 'Keywords', 'Subject', 'Author', 'Creator', 'Producer', 'CreationDate', 'ModificationDate',
@@ -62,13 +74,17 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
      *
      * @throws FileNotFoundException
      */
-    public function __construct(string $pdftkBinary = null, ProcessFactory $processFactory = null)
+    public function __construct(string $pdfcpuBinary = null, ProcessFactory $processFactory = null)
     {
-        $this->setBinary($pdftkBinary ?: $this->guessBinary(PHP_OS));
+        $this->setBinary($pdfcpuBinary ?: $this->guessBinary(PHP_OS));
         $this->processFactory = $processFactory ?: new ProcessFactory();
         $this->escaper = new Escaper();
         $this->fileChecker = new FileChecker();
-        $this->bookmarksHelper = new PdfcpuWrapperBookmarksHelper($this->getBinary(false), $this->processFactory);
+        $this->bookmarksHelper = new PdfcpuWrapperBookmarksHelper(
+            $this->getBinary(false),
+            $this->processFactory,
+            static::REPLACE_FLAG
+        );
     }
 
     /**
@@ -129,8 +145,9 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
             }
 
             $commandLine = sprintf(
-                '%s collect -pages %s %s %s',
+                '%s collect %s %s %s %s',
                 $this->getBinary(),
+                static::PAGES_FLAG,
                 implode(',', $pages),
                 $esc->shellArg($infile),
                 $esc->shellArg($target)
@@ -161,8 +178,9 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
         $esc = $this->escaper;
 
         $commandLine = sprintf(
-            '%s collect -pages %s %s %s',
+            '%s collect %s %s %s %s',
             $this->getBinary(),
+            static::PAGES_FLAG,
             implode(',', $order),
             $esc->shellArg($infile),
             $esc->shellArg($outfile)
@@ -215,7 +233,12 @@ class PdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
     {
         $this->fileChecker->checkPdfFileExists($infile);
 
-        $cmd = sprintf('%s info -pages 1- -j %s', $this->getBinary(), $this->escaper->shellArg($infile));
+        $cmd = sprintf(
+            '%s info %s 1- -j %s',
+            $this->getBinary(),
+            static::PAGES_FLAG,
+            $this->escaper->shellArg($infile)
+        );
 
         $process = $this->processFactory->createProcess($cmd);
 

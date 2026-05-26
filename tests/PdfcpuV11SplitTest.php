@@ -16,12 +16,12 @@ use Symfony\Component\Process\Process;
 use PHPUnit\Framework\TestCase;
 
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
-class PdfcpuSplitTest extends TestCase
+class PdfcpuV11SplitTest extends TestCase
 {
     public function testSplitException()
     {
@@ -56,7 +56,7 @@ class PdfcpuSplitTest extends TestCase
                            ->with($expectedCmd2)
                            ->willReturn($mockProcess2);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
 
         try {
             $wrapper->split('/path/to/input.pdf', ['/path/to/out1.pdf' => [2], '/path/to/out2.pdf' => [1, 3]]);
@@ -92,7 +92,7 @@ class PdfcpuSplitTest extends TestCase
                            ->with($expectedCmd2)
                            ->willReturn($mockProcess2);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
 
         $wrapper->split('/path/to/input.pdf', ['/path/to/odd.pdf' => [1, 3], '/path/to/even.pdf' => [2, 4]]);
     }
@@ -121,7 +121,7 @@ class PdfcpuSplitTest extends TestCase
                            ->with($expectedCmd2)
                            ->willReturn($mockProcess2);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
 
         $wrapper->split('/path/to/input.pdf', ['odd.pdf' => [1, 3], 'even.pdf' => [2, 4]], '/out');
     }
@@ -150,7 +150,7 @@ class PdfcpuSplitTest extends TestCase
                            ->with($expectedCmd2)
                            ->willReturn($mockProcess2);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
 
 
         $wrapper->split('/path/to/input.pdf', ['/path/to/odd 2.pdf' => [1, 3], '/path/to/even 2.pdf' => [2, 4]]);
@@ -180,7 +180,7 @@ class PdfcpuSplitTest extends TestCase
                            ->with($expectedCmd2)
                            ->willReturn($mockProcess2);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
 
 
         $wrapper->split('/path/to/inpüt.pdf', ['/path/to/sämple&2.pdf' => [4, 3], '/path/to/out$put.pdf' => [2, 1]]);

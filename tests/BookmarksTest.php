@@ -19,7 +19,7 @@ use Gmi\Toolkit\Pdftk\Bookmark;
 use Gmi\Toolkit\Pdftk\Bookmarks;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 
 class BookmarksTest extends TestCase
@@ -476,7 +476,7 @@ class BookmarksTest extends TestCase
     {
         return [
             [new PdftkWrapper()],
-            [new PdfcpuWrapper()],
+            [new PdfcpuV11Wrapper()],
         ];
     }
 }

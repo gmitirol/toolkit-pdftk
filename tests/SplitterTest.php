@@ -19,7 +19,7 @@ use Gmi\Toolkit\Pdftk\Constant\PageSizes;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Exception\SplitException;
 use Gmi\Toolkit\Pdftk\Pages;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\PdftkWrapper;
 use Gmi\Toolkit\Pdftk\Splitter;
 
@@ -157,7 +157,7 @@ class PdfSplitterTest extends TestCase
     {
         return [
             [new PdftkWrapper()],
-            [new PdfcpuWrapper()],
+            [new PdfcpuV11Wrapper()],
         ];
     }
 }

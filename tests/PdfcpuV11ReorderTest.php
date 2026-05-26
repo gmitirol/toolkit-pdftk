@@ -16,12 +16,12 @@ use Symfony\Component\Process\Process;
 use PHPUnit\Framework\TestCase;
 
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
-class PdfcpuReorderTest extends TestCase
+class PdfcpuV11ReorderTest extends TestCase
 {
     public function testReorderException()
     {
@@ -46,7 +46,7 @@ class PdfcpuReorderTest extends TestCase
                            ->with("'$binary' collect -pages 3,1,2 '/path/to/input' '/path/to/output.pdf'")
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
 
         try {
             $wrapper->reorder('/path/to/input', [3, 1, 2], '/path/to/output.pdf');
@@ -73,7 +73,7 @@ class PdfcpuReorderTest extends TestCase
                            ->with("'$binary' collect -pages 3,1,2 '/path/to/input' '/path/to/output.pdf'")
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
 
         $wrapper->reorder('/path/to/input', [3, 1, 2], '/path/to/output.pdf');
     }

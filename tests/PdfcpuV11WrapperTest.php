@@ -13,7 +13,7 @@ namespace Gmi\Toolkit\Pdftk\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
 
 use Exception;
@@ -23,11 +23,11 @@ use Exception;
  *
  * The features implemented from WrapperInterface are unit-tested in individual Pdfcpu*Test classes.
  */
-class PdfcpuWrapperTest extends TestCase
+class PdfcpuV11WrapperTest extends TestCase
 {
     public function testGuessBinary()
     {
-        $pdftk = new PdfcpuWrapper();
+        $pdftk = new PdfcpuV11Wrapper();
         $this->assertSame('/usr/bin/pdfcpu', $pdftk->guessBinary('Linux'));
         $this->assertSame('C:\\Program Files\\pdfcpu\\pdfcpu.exe', $pdftk->guessBinary('WINNT'));
         $this->assertSame('C:\\Program Files\\pdfcpu\\pdfcpu.exe', $pdftk->guessBinary('Windows'));
@@ -37,7 +37,7 @@ class PdfcpuWrapperTest extends TestCase
     {
         $binary = __DIR__ . '/Fixtures/binary.sh';
 
-        $pdftk = new PdfcpuWrapper($binary);
+        $pdftk = new PdfcpuV11Wrapper($binary);
 
         $this->assertSame(
             $binary,
@@ -60,6 +60,6 @@ class PdfcpuWrapperTest extends TestCase
         $binary = __DIR__ . '/Fixtures/missing.sh';
 
         $this->expectException(FileNotFoundException::Class);
-        new PdfcpuWrapper($binary);
+        new PdfcpuV11Wrapper($binary);
     }
 }
