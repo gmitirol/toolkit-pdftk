@@ -25,7 +25,8 @@ use Exception;
  * Detects the installed pdfcpu version and instantiates the matching wrapper.
  *
  * Versions up to and including 0.11.x use single-dash long flags and are handled by PdfcpuV11Wrapper.
- * Versions 0.12.x and newer adopted Cobra and use POSIX-style long flags; they are handled by PdfcpuV12Wrapper.
+ * Versions 0.12.x and newer (including 0.13.x) adopted Cobra and use POSIX-style long flags; they are
+ * handled by PdfcpuV12Wrapper.
  */
 final class PdfcpuWrapperFactory
 {
@@ -87,9 +88,10 @@ final class PdfcpuWrapperFactory
 
         $output = $process->getOutput();
 
-        // pdfcpu prints the version on a line like "pdfcpu: v0.12.1 dev"; v0.12 also prints a
-        // multi-line config-mismatch banner before it, so match the version line anywhere in the output.
-        if (preg_match('/^pdfcpu:\s*v(\d+)\.(\d+)/m', $output, $matches) !== 1) {
+        // Up to v0.12 pdfcpu prints the version on a line like "pdfcpu: v0.12.1 dev" (v0.12 also prints a
+        // multi-line config-mismatch banner before it). v0.13 reworked the output into a key-aligned block
+        // led by "version: 0.13.0" (no "v" prefix). Match either form anywhere in the output.
+        if (preg_match('/^(?:pdfcpu:\s*v|version:\s*v?)(\d+)\.(\d+)/m', $output, $matches) !== 1) {
             throw new PdfException(
                 sprintf('Failed to parse pdfcpu version from "%s"!', $binary),
                 0,

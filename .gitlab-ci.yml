@@ -22,6 +22,10 @@ build_pdfcpu:
     - cd /root/pdfcpu && git checkout v0.12.1
     - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu_0.12.1"
     - '"$CI_PROJECT_DIR/pdfcpu_0.12.1" version'
+    # Build v0.13.0 (Cobra-based CLI with the reworked "version:" output block)
+    - cd /root/pdfcpu && git checkout v0.13.0
+    - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu_0.13.0"
+    - '"$CI_PROJECT_DIR/pdfcpu_0.13.0" version'
     # Build current master (drives the version-agnostic high-level tests)
     - cd /root/pdfcpu && git checkout master
     - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu"
@@ -31,6 +35,7 @@ build_pdfcpu:
       - $CI_PROJECT_DIR/pdfcpu
       - $CI_PROJECT_DIR/pdfcpu_0.11.1
       - $CI_PROJECT_DIR/pdfcpu_0.12.1
+      - $CI_PROJECT_DIR/pdfcpu_0.13.0
   tags:
       - shared
 
@@ -52,6 +57,7 @@ build_pdfcpu:
     - cp $CI_PROJECT_DIR/pdfcpu /usr/bin/pdfcpu
     - cp $CI_PROJECT_DIR/pdfcpu_0.11.1 /usr/local/bin/pdfcpu_0.11.1
     - cp $CI_PROJECT_DIR/pdfcpu_0.12.1 /usr/local/bin/pdfcpu_0.12.1
+    - cp $CI_PROJECT_DIR/pdfcpu_0.13.0 /usr/local/bin/pdfcpu_0.13.0
     - apk add --no-cache --update pdftk
     - php-ext.sh enable 'xdebug'
     - composer install --no-progress

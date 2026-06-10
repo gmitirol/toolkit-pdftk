@@ -42,6 +42,12 @@ class PdfcpuWrapperFactoryTest extends TestCase
         . "config: /root/.config/pdfcpu/config.yml\n"
         . "base  : go1.26.1\n";
 
+    private const V13_OUTPUT = "version: 0.13.0\n"
+        . " config: /root/.config/pdfcpu/config.yml\n"
+        . " commit: 198b38fe\n"
+        . "   date: 2026-06-09 13:31:40 UTC\n"
+        . "     go: go1.26.1\n";
+
     public function testCreateReturnsV11WrapperForV011()
     {
         $binary = __DIR__ . '/Fixtures/binary.sh';
@@ -57,6 +63,15 @@ class PdfcpuWrapperFactoryTest extends TestCase
         $binary = __DIR__ . '/Fixtures/binary.sh';
 
         $wrapper = PdfcpuWrapperFactory::create($binary, $this->mockProcessFactory($binary, self::V12_OUTPUT));
+
+        $this->assertInstanceOf(PdfcpuV12Wrapper::class, $wrapper);
+    }
+
+    public function testCreateReturnsV12WrapperForV13()
+    {
+        $binary = __DIR__ . '/Fixtures/binary.sh';
+
+        $wrapper = PdfcpuWrapperFactory::create($binary, $this->mockProcessFactory($binary, self::V13_OUTPUT));
 
         $this->assertInstanceOf(PdfcpuV12Wrapper::class, $wrapper);
     }
@@ -91,6 +106,7 @@ class PdfcpuWrapperFactoryTest extends TestCase
         return [
             'v0.11.1' => [self::V11_OUTPUT, 0, 11],
             'v0.12.1 with banner' => [self::V12_OUTPUT, 0, 12],
+            'v0.13.0 new format' => [self::V13_OUTPUT, 0, 13],
             'v0.10.0' => ["pdfcpu: v0.10.0\n", 0, 10],
             'v1.0.0' => ["pdfcpu: v1.0.0\n", 1, 0],
             'v0.12.0 no banner' => ["pdfcpu: v0.12.0 dev\ncommit: abc\n", 0, 12],
@@ -183,6 +199,17 @@ class PdfcpuWrapperFactoryTest extends TestCase
         $binary = '/usr/local/bin/pdfcpu_0.12.1';
         if (!is_executable($binary)) {
             $this->markTestSkipped(sprintf('pdfcpu v0.12 binary not found at %s', $binary));
+        }
+
+        $wrapper = PdfcpuWrapperFactory::create($binary);
+        $this->assertInstanceOf(PdfcpuV12Wrapper::class, $wrapper);
+    }
+
+    public function testCreateUsesRealBinaryV13()
+    {
+        $binary = '/usr/local/bin/pdfcpu_0.13.0';
+        if (!is_executable($binary)) {
+            $this->markTestSkipped(sprintf('pdfcpu v0.13 binary not found at %s', $binary));
         }
 
         $wrapper = PdfcpuWrapperFactory::create($binary);
