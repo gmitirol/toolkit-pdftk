@@ -10,14 +10,14 @@ Requirements
 ------------
 * PHP 7.1.0 or higher
 * mbstring extension
-* pdftk
+* pdftk or pdfcpu
 
 Installation
 ------------
 The recommended way to install toolkit-pdftk is via composer.
 ```json
 "require": {
-    "gmi/toolkit-pdftk": "3.0.*"
+    "gmi/toolkit-pdftk": "3.1.*"
 }
 ```
 
