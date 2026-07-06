@@ -2,7 +2,7 @@
 /**
  * pdfcpu wrapper join test
  *
- * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2026 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -15,13 +15,13 @@ use Symfony\Component\Process\Process;
 
 use PHPUnit\Framework\TestCase;
 
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV12Wrapper;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
-class PdfcpuJoinTest extends TestCase
+class PdfcpuV12JoinTest extends TestCase
 {
     public function testJoinException()
     {
@@ -48,7 +48,7 @@ class PdfcpuJoinTest extends TestCase
                            ->with($expectedCmd)
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV12Wrapper($binary, $mockProcessFactory);
 
         try {
             $wrapper->join(['/path/to/sample1.pdf', '/path/to/sample2.pdf'], '/path/to/output.pdf');
@@ -76,7 +76,7 @@ class PdfcpuJoinTest extends TestCase
                            ->with($expectedCmd)
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV12Wrapper($binary, $mockProcessFactory);
 
         $wrapper->join(['/path/to/sample1.pdf', '/path/to/sample2.pdf'], '/path/to/output.pdf');
     }
@@ -97,7 +97,7 @@ class PdfcpuJoinTest extends TestCase
                            ->with($expectedCmd)
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV12Wrapper($binary, $mockProcessFactory);
 
 
         $wrapper->join(['/path/to/sample 1.pdf', '/path/to/sample 2.pdf'], '/path/to/out put.pdf');
@@ -119,7 +119,7 @@ class PdfcpuJoinTest extends TestCase
                            ->with($expectedCmd)
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV12Wrapper($binary, $mockProcessFactory);
         $wrapper->join(['/path/to/sam;ple.pdf', '/path/to/sämple&2.pdf'], '/path/to/out$put.pdf');
     }
 }

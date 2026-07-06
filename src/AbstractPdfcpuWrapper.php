@@ -1,0 +1,387 @@
+<?php
+/**
+ * pdfcpu wrapper base class
+ *
+ * @copyright 2014-2026 Institute of Legal Medicine, Medical University of Innsbruck
+ * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
+ * @license LGPL-3.0-only
+ * @link http://www.gerichtsmedizin.at/
+ *
+ * @package pdftk
+ */
+
+namespace Gmi\Toolkit\Pdftk;
+
+use Symfony\Component\Process\Process;
+
+use Gmi\Toolkit\Pdftk\Exception\FileNotFoundException;
+use Gmi\Toolkit\Pdftk\Exception\PdfException;
+use Gmi\Toolkit\Pdftk\Util\Escaper;
+use Gmi\Toolkit\Pdftk\Util\FileChecker;
+use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
+
+use Exception;
+
+/**
+ * Abstract base class for pdfcpu wrappers.
+ *
+ * Concrete subclasses provide version-specific CLI flag tokens via the PAGES_FLAG and REPLACE_FLAG constants.
+ *
+ * @internal Only the methods exposed by the interfaces should be accessed from outside.
+ *
+ * @psalm-suppress PropertyNotSetInConstructor as $binaryPath is defined and set in the BinaryPathAwareTrait
+ */
+abstract class AbstractPdfcpuWrapper implements WrapperInterface, BinaryPathAwareInterface
+{
+    use BinaryPathAwareTrait;
+
+    /**
+     * Long-form flag for selecting pages on `collect` / `info`. Subclasses must override.
+     */
+    protected const PAGES_FLAG = '';
+
+    /**
+     * Long-form flag for replacing existing bookmarks on `bookmarks import`. Subclasses must override.
+     */
+    protected const REPLACE_FLAG = '';
+
+    private const SUPPORTED_METADATA_ATTRIBUTES = [
+        'Title', 'Keywords', 'Subject', 'Author', 'Creator', 'Producer', 'CreationDate', 'ModificationDate',
+    ];
+
+    /**
+     * @var ProcessFactory
+     */
+    private $processFactory;
+
+    /**
+     * @var Escaper
+     */
+    private $escaper;
+
+    /**
+     * @var FileChecker
+     */
+    private $fileChecker;
+
+    /**
+     * @var PdfcpuWrapperBookmarksHelper
+     */
+    private $bookmarksHelper;
+
+    /**
+     * Constructor.
+     *
+     * @throws FileNotFoundException
+     */
+    public function __construct(string $pdfcpuBinary = null, ProcessFactory $processFactory = null)
+    {
+        $this->setBinary($pdfcpuBinary ?: $this->guessBinary(PHP_OS));
+        $this->processFactory = $processFactory ?: new ProcessFactory();
+        $this->escaper = new Escaper();
+        $this->fileChecker = new FileChecker();
+        $this->bookmarksHelper = new PdfcpuWrapperBookmarksHelper(
+            $this->getBinary(false),
+            $this->processFactory,
+            static::REPLACE_FLAG
+        );
+    }
+
+    /**
+     * Guesses the pdfcpu binary path based on the operating system.
+     */
+    public function guessBinary(string $operatingSystemString): string
+    {
+        if (strtoupper(substr($operatingSystemString, 0, 3)) === 'WIN') {
+            $binary = 'C:\\Program Files\\pdfcpu\\pdfcpu.exe';
+        } else {
+            $binary = '/usr/bin/pdfcpu';
+        }
+
+        return $binary;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function join(array $filePaths, string $outfile): void
+    {
+        $esc = $this->escaper;
+
+        $filePathsEscaped = array_map(function (string $filePath) use ($esc) {
+            return $esc->shellArg($filePath);
+        }, $filePaths);
+
+        $fileList = implode(' ', $filePathsEscaped);
+
+        $commandLine = sprintf('%s merge %s %s', $this->getBinary(), $esc->shellArg($outfile), $fileList);
+
+        /**
+         * @var Process
+         */
+        $process = $this->processFactory->createProcess($commandLine);
+
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
+            throw new PdfException($e->getMessage(), 0, $e, $process->getErrorOutput(), $process->getOutput());
+        }
+
+        $process->getOutput();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function split(string $infile, array $mapping, string $outputFolder = null): void
+    {
+        $esc = $this->escaper;
+
+        foreach ($mapping as $filename => $pages) {
+            if ($outputFolder) {
+                $target = sprintf('%s/%s', $outputFolder, $filename);
+            } else {
+                $target = $filename;
+            }
+
+            $commandLine = sprintf(
+                '%s collect %s %s %s %s',
+                $this->getBinary(),
+                static::PAGES_FLAG,
+                implode(',', $pages),
+                $esc->shellArg($infile),
+                $esc->shellArg($target)
+            );
+
+            $process = $this->processFactory->createProcess($commandLine);
+
+            try {
+                $process->mustRun();
+            } catch (Exception $e) {
+                throw new PdfException($e->getMessage(), 0, $e, $process->getErrorOutput(), $process->getOutput());
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function reorder(string $infile, array $order, string $outfile = null): void
+    {
+        $temporaryOutFile = false;
+
+        if ($outfile === null || $infile === $outfile) {
+            $temporaryOutFile = true;
+            $outfile = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
+        }
+
+        $esc = $this->escaper;
+
+        $commandLine = sprintf(
+            '%s collect %s %s %s %s',
+            $this->getBinary(),
+            static::PAGES_FLAG,
+            implode(',', $order),
+            $esc->shellArg($infile),
+            $esc->shellArg($outfile)
+        );
+
+        $process = $this->processFactory->createProcess($commandLine);
+
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
+            throw new PdfException(
+                sprintf('Failed to reorder PDF "%s"! Error: %s', $infile, $e->getMessage()),
+                0,
+                $e,
+                $process->getErrorOutput(),
+                $process->getOutput()
+            );
+        }
+
+        if ($temporaryOutFile) {
+            unlink($infile);
+            rename($outfile, $infile);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function applyBookmarks(Bookmarks $bookmarks, string $infile, string $outfile = null): self
+    {
+        $this->bookmarksHelper->applyBookmarks($bookmarks, $infile, $outfile);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function importBookmarks(Bookmarks $bookmarks, string $infile): self
+    {
+        $this->bookmarksHelper->importBookmarks($bookmarks, $infile);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function importPages(Pages $pages, string $infile): self
+    {
+        $this->fileChecker->checkPdfFileExists($infile);
+
+        $cmd = sprintf(
+            '%s info %s 1- -j %s',
+            $this->getBinary(),
+            static::PAGES_FLAG,
+            $this->escaper->shellArg($infile)
+        );
+
+        $process = $this->processFactory->createProcess($cmd);
+
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
+            $exception = new PdfException(
+                sprintf('Failed to read pages data from "%s"! Error: %s', $infile, $e->getMessage()),
+                0,
+                $e,
+                $process->getErrorOutput(),
+                $process->getOutput()
+            );
+
+            throw $exception;
+        }
+
+        $infoRaw = $this->decodeInfoJson($process->getOutput());
+
+        $pageBoundaries = $infoRaw['infos'][0]['pageBoundaries'];
+
+        // the page numbers in the JSON are strings, not numbers and sorted as strings, ensure natural sort
+        ksort($pageBoundaries, SORT_NATURAL);
+
+        foreach ($pageBoundaries as $pageNumber => $pageInfo) {
+            $page = new Page();
+
+            $page
+                ->setPageNumber((int) $pageNumber)
+                ->setRotation((int) $pageInfo['rot'])
+                ->setWidth((float) $pageInfo['mediaBox']['rect']['ur']['x'])
+                ->setHeight((float) $pageInfo['mediaBox']['rect']['ur']['y'])
+            ;
+
+            $pages->add($page);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function applyMetadata(Metadata $metadata, string $infile, string $outfile = null): self
+    {
+        $temporaryOutFile = false;
+
+        $this->fileChecker->checkPdfFileExists($infile);
+
+        $properties = [];
+        foreach ($metadata->all() as $key => $value) {
+            $properties[] = sprintf('%s=%s', $key, $this->escaper->shellArg($value));
+        }
+
+        $propArgs = implode(' ', $properties);
+
+        if ($outfile === null || $infile === $outfile) {
+            $temporaryOutFile = true;
+            $outfile = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
+        }
+
+        copy($infile, $outfile);
+
+        $cmd = sprintf('%s properties add %s %s', $this->getBinary(), $this->escaper->shellArg($outfile), $propArgs);
+        $process = $this->processFactory->createProcess($cmd);
+
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
+            $exception = new PdfException(
+                sprintf('Failed to write PDF metadata to "%s"! Error: %s', $outfile, $e->getMessage()),
+                0,
+                $e,
+                $process->getErrorOutput(),
+                $process->getOutput()
+            );
+        }
+
+        if ($temporaryOutFile && !isset($exception)) {
+            unlink($infile);
+            rename($outfile, $infile);
+        }
+
+        if (isset($exception)) {
+            throw $exception;
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function importMetadata(Metadata $metadata, string $infile): self
+    {
+        $cmd = sprintf('%s info -j %s', $this->getBinary(), $this->escaper->shellArg($infile));
+
+        $process = $this->processFactory->createProcess($cmd);
+
+        try {
+            $process->mustRun();
+        } catch (Exception $e) {
+            throw new PdfException(
+                sprintf('Failed to read metadata data from "%s"! Error: %s', $infile, $e->getMessage()),
+                0,
+                $e,
+                $process->getErrorOutput(),
+                $process->getOutput()
+            );
+        }
+
+        $raw = $this->decodeInfoJson($process->getOutput());
+        $metadataArray = $raw['infos'][0];
+
+        foreach (self::SUPPORTED_METADATA_ATTRIBUTES as $attribute) {
+            $attributeNormalized = lcfirst($attribute);
+
+            if ($attributeNormalized === 'keywords' && isset($metadataArray['keywords'])) {
+                $metadataArray['keywords'] = implode(', ', $metadataArray['keywords']);
+            }
+
+            if (isset($metadataArray[$attributeNormalized]) && '' !== trim($metadataArray[$attributeNormalized])) {
+                $metadata->set($attribute, $metadataArray[$attributeNormalized]);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Decodes the JSON payload from a pdfcpu `info -j` invocation.
+     *
+     * pdfcpu may prepend non-JSON lines to stdout: v0.11 emits a `pages: 1,2,…` summary, and v0.12 prints
+     * a multi-line configuration-mismatch banner when the user's config dir is out of sync. Both pollute
+     * the start of the output, so this helper skips to the first `{` before decoding.
+     */
+    private function decodeInfoJson(string $output): array
+    {
+        $start = strpos($output, '{');
+        if ($start === false) {
+            return [];
+        }
+
+        return json_decode(substr($output, $start), true) ?? [];
+    }
+}

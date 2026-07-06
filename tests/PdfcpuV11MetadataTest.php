@@ -2,7 +2,7 @@
 /**
  * pdfcpu wrapper metadata test
  *
- * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2026 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -18,12 +18,12 @@ use PHPUnit\Framework\TestCase;
 use Gmi\Toolkit\Pdftk\Exception\NotImplementedException;
 use Gmi\Toolkit\Pdftk\Exception\PdfException;
 use Gmi\Toolkit\Pdftk\Metadata;
-use Gmi\Toolkit\Pdftk\PdfcpuWrapper;
+use Gmi\Toolkit\Pdftk\PdfcpuV11Wrapper;
 use Gmi\Toolkit\Pdftk\Util\ProcessFactory;
 
 use Exception;
 
-class PdfcpuMetadataTest extends TestCase
+class PdfcpuV11MetadataTest extends TestCase
 {
     public function testImportMetadataException()
     {
@@ -52,7 +52,7 @@ class PdfcpuMetadataTest extends TestCase
                            ->with(sprintf('\'%s\' info -j \'%s\'', $binary, $pdf))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $metadata = new Metadata();
 
         try {
@@ -86,7 +86,7 @@ class PdfcpuMetadataTest extends TestCase
                            ->with(sprintf('\'%s\' info -j \'%s\'', $binary, $pdf))
                            ->willReturn($mockProcess);
 
-        $pdfcpu = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $pdfcpu = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $metadata = new Metadata();
 
         $pdfcpu->importMetadata($metadata, $pdf);
@@ -110,7 +110,7 @@ class PdfcpuMetadataTest extends TestCase
                            ->with(sprintf('\'%s\' properties add \'%s\' Title=\'Foo\'', $binary, $target))
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $metadata = new Metadata($wrapper);
         $metadata->set('Title', 'Foo');
         $wrapper->applyMetadata($metadata, $source, $target);
@@ -137,7 +137,7 @@ class PdfcpuMetadataTest extends TestCase
                            ->with(sprintf('\'%s\' properties add \'%s\' Title=\'Foo\'', $binary, $target))
                            ->willReturn($mockProcess);
 
-        $wrapper = new PdfcpuWrapper($binary, $mockProcessFactory);
+        $wrapper = new PdfcpuV11Wrapper($binary, $mockProcessFactory);
         $metadata = new Metadata($wrapper);
         $metadata->set('Title', 'Foo');
         $this->expectException(PdfException::class);
@@ -151,7 +151,11 @@ class PdfcpuMetadataTest extends TestCase
         $source = __DIR__ . '/Fixtures/empty.pdf';
         $target = tempnam(sys_get_temp_dir(), 'pdf') . '.pdf';
 
-        $wrapper = new PdfcpuWrapper();
+        $binary = '/usr/local/bin/pdfcpu_0.11.1';
+        if (!is_executable($binary)) {
+            $this->markTestSkipped(sprintf('pdfcpu v0.11 binary not found at %s', $binary));
+        }
+        $wrapper = new PdfcpuV11Wrapper($binary);
         $metaSet = new Metadata($wrapper);
 
         $metaSet->set('Creator', 'Awesome PDF creator 1.0')

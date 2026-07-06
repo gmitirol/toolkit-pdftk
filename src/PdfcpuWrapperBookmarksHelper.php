@@ -2,7 +2,7 @@
 /**
  * bookmarks helper for pdfcpu wrapper
  *
- * @copyright 2014-2024 Institute of Legal Medicine, Medical University of Innsbruck
+ * @copyright 2014-2026 Institute of Legal Medicine, Medical University of Innsbruck
  * @author Andreas Erhard <andreas.erhard@i-med.ac.at>
  * @license LGPL-3.0-only
  * @link http://www.gerichtsmedizin.at/
@@ -47,16 +47,24 @@ class PdfcpuWrapperBookmarksHelper
     private $fileChecker;
 
     /**
+     * @var string
+     */
+    private $replaceFlag;
+
+    /**
      * Constructor.
+     *
+     * @param string $replaceFlag CLI flag to replace existing bookmarks (e.g. `-replace` or `--replace`)
      *
      * @throws FileNotFoundException
      */
-    public function __construct(string $pdftkBinaryPath, ProcessFactory $processFactory)
+    public function __construct(string $pdftkBinaryPath, ProcessFactory $processFactory, string $replaceFlag)
     {
         $this->binaryPath = $pdftkBinaryPath;
         $this->processFactory = $processFactory;
         $this->escaper = new Escaper();
         $this->fileChecker = new FileChecker();
+        $this->replaceFlag = $replaceFlag;
     }
 
     /**
@@ -77,8 +85,9 @@ class PdfcpuWrapperBookmarksHelper
         }
 
         $cmd = sprintf(
-            '%s bookmarks import -replace %s %s %s',
+            '%s bookmarks import %s %s %s %s',
             $this->getBinary(),
+            $this->replaceFlag,
             $this->escaper->shellArg($infile),
             $this->escaper->shellArg($tempfile),
             $this->escaper->shellArg($outfile)
