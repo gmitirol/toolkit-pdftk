@@ -11,6 +11,16 @@ build:
             version: 7.3
             pecl_extensions:
                 - xdebug
+    dependencies:
+        before:
+            # Scrutinizer ships Composer 1.x, which can no longer install packages.
+            # The bundled 1.x predates the --2.2 flag (added in Composer 2.3.3), so first
+            # hop to the latest Composer 2.x via --2 (supported since 1.10), then pin down
+            # to the 2.2 LTS line, which still supports PHP 7.x. sudo is required because
+            # the composer phar lives in the root-owned /usr/bin; "env PATH=$PATH" keeps the
+            # phpenv-shimmed php on PATH, which sudo's secure_path would otherwise drop.
+            - 'sudo env "PATH=$PATH" composer self-update --2'
+            - 'sudo env "PATH=$PATH" composer self-update --2.2'
     tests:
         before:
             # Install dependencies and store working dir (required for Scrutinizer)
