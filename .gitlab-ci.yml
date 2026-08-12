@@ -26,6 +26,14 @@ build_pdfcpu:
     - cd /root/pdfcpu && git checkout v0.13.0
     - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu_0.13.0"
     - '"$CI_PROJECT_DIR/pdfcpu_0.13.0" version'
+    # Build v0.14.0 (renamed the "no bookmarks available" export diagnostic)
+    - cd /root/pdfcpu && git checkout v0.14.0
+    - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu_0.14.0"
+    - '"$CI_PROJECT_DIR/pdfcpu_0.14.0" version'
+    # Build v0.15.0
+    - cd /root/pdfcpu && git checkout v0.15.0
+    - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu_0.15.0"
+    - '"$CI_PROJECT_DIR/pdfcpu_0.15.0" version'
     # Build current master (drives the version-agnostic high-level tests)
     - cd /root/pdfcpu && git checkout master
     - cd cmd/pdfcpu && /go/bin/go build -o "$CI_PROJECT_DIR/pdfcpu"
@@ -36,6 +44,8 @@ build_pdfcpu:
       - $CI_PROJECT_DIR/pdfcpu_0.11.1
       - $CI_PROJECT_DIR/pdfcpu_0.12.1
       - $CI_PROJECT_DIR/pdfcpu_0.13.0
+      - $CI_PROJECT_DIR/pdfcpu_0.14.0
+      - $CI_PROJECT_DIR/pdfcpu_0.15.0
   tags:
       - shared
 
@@ -58,6 +68,8 @@ build_pdfcpu:
     - cp $CI_PROJECT_DIR/pdfcpu_0.11.1 /usr/local/bin/pdfcpu_0.11.1
     - cp $CI_PROJECT_DIR/pdfcpu_0.12.1 /usr/local/bin/pdfcpu_0.12.1
     - cp $CI_PROJECT_DIR/pdfcpu_0.13.0 /usr/local/bin/pdfcpu_0.13.0
+    - cp $CI_PROJECT_DIR/pdfcpu_0.14.0 /usr/local/bin/pdfcpu_0.14.0
+    - cp $CI_PROJECT_DIR/pdfcpu_0.15.0 /usr/local/bin/pdfcpu_0.15.0
     - apk add --no-cache --update pdftk
     - php-ext.sh enable 'xdebug'
     - composer install --no-progress

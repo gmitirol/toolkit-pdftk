@@ -114,6 +114,8 @@ class PdfcpuV11BookmarksTest extends TestCase
         $bookmarks = new Bookmarks();
 
         $pdfcpu->importBookmarks($bookmarks, $pdf);
+
+        $this->assertCount(0, $bookmarks->all());
     }
 
     public function testApplyBookmarksException()

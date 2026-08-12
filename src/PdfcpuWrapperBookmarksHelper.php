@@ -149,14 +149,29 @@ class PdfcpuWrapperBookmarksHelper
             );
         }
 
-        if (isset($exception) && false === strpos($process->getErrorOutput(), 'no outlines available')) {
+        if (isset($exception) && !$this->reportsMissingBookmarks($process->getErrorOutput())) {
             @unlink($tempBookmarksFile);
             throw $exception;
         }
 
+        // Up to 0.13 pdfcpu left a partial JSON file behind in this case, from 0.14 on it does not.
+        // The suppressed read degrades the missing file to an empty bookmark list, so keep it.
         $this->importBookmarksFromJson($bookmarks, @file_get_contents($tempBookmarksFile) ?: '');
 
         @unlink($tempBookmarksFile);
+    }
+
+    /**
+     * Tells whether a failed bookmark export merely reports that the PDF has no bookmarks.
+     *
+     * Every supported pdfcpu version exits non-zero here, so the diagnostic is the only way to tell
+     * this apart from a real failure. pdfcpu renamed it in 0.14: up to 0.13 it reads
+     * "no outlines available", from 0.14 on "export bookmarks: <file>: no bookmarks available".
+     */
+    private function reportsMissingBookmarks(string $errorOutput): bool
+    {
+        return false !== strpos($errorOutput, 'no outlines available')
+            || false !== strpos($errorOutput, 'no bookmarks available');
     }
 
     /**

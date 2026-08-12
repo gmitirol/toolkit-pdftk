@@ -92,6 +92,9 @@ class PdfcpuWrapperTest extends TestCase
         return [
             'v0.11' => ['/usr/local/bin/pdfcpu_0.11.1'],
             'v0.12' => ['/usr/local/bin/pdfcpu_0.12.1'],
+            'v0.13' => ['/usr/local/bin/pdfcpu_0.13.0'],
+            'v0.14' => ['/usr/local/bin/pdfcpu_0.14.0'],
+            'v0.15' => ['/usr/local/bin/pdfcpu_0.15.0'],
         ];
     }
 }
