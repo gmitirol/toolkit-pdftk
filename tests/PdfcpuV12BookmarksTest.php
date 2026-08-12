@@ -89,7 +89,10 @@ class PdfcpuV12BookmarksTest extends TestCase
         $pdfcpu->importBookmarks($bookmarks, $pdf);
     }
 
-    public function testImportBookmarksFileWithoutBookmarks()
+    /**
+     * @dataProvider provideMissingBookmarksErrorOutputs
+     */
+    public function testImportBookmarksFileWithoutBookmarks(string $errorOutput)
     {
         $binary = __DIR__ . '/Fixtures/binary.sh';
         $pdf = __DIR__ . '/Fixtures/example.pdf';
@@ -102,7 +105,7 @@ class PdfcpuV12BookmarksTest extends TestCase
                     ->will($this->throwException($exception));
         $mockProcess->expects($this->atLeastOnce())
                     ->method('getErrorOutput')
-                    ->willReturn('no outlines available');
+                    ->willReturn($errorOutput);
 
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
@@ -114,6 +117,19 @@ class PdfcpuV12BookmarksTest extends TestCase
         $bookmarks = new Bookmarks();
 
         $pdfcpu->importBookmarks($bookmarks, $pdf);
+
+        $this->assertCount(0, $bookmarks->all());
+    }
+
+    /**
+     * pdfcpu renamed the "PDF has no bookmarks" diagnostic in 0.14; the V12 wrapper serves both eras.
+     */
+    public function provideMissingBookmarksErrorOutputs(): array
+    {
+        return [
+            'v0.12 and v0.13 wording' => ['no outlines available'],
+            'v0.14 and v0.15 wording' => ['export bookmarks: example.pdf: no bookmarks available'],
+        ];
     }
 
     public function testApplyBookmarksException()
