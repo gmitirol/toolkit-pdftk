@@ -10,7 +10,11 @@ Requirements
 ------------
 * PHP 7.1.0 or higher
 * mbstring extension
-* pdftk or pdfcpu
+* pdftk or pdfcpu (0.11 to 0.16)
+
+pdfcpu 0.16 and newer refuse to run on a configuration written by an older pdfcpu version: every call
+fails with `configuration reset required`. After upgrading pdfcpu, back up the configuration and run
+`pdfcpu config reset` as the user which executes pdfcpu.
 
 Installation
 ------------
