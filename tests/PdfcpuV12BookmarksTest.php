@@ -128,7 +128,7 @@ class PdfcpuV12BookmarksTest extends TestCase
     {
         return [
             'v0.12 and v0.13 wording' => ['no outlines available'],
-            'v0.14 and v0.15 wording' => ['export bookmarks: example.pdf: no bookmarks available'],
+            'v0.14 to v0.16 wording' => ['export bookmarks: example.pdf: no bookmarks available'],
         ];
     }
 

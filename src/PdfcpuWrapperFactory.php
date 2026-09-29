@@ -25,7 +25,7 @@ use Exception;
  * Detects the installed pdfcpu version and instantiates the matching wrapper.
  *
  * Versions up to and including 0.11.x use single-dash long flags and are handled by PdfcpuV11Wrapper.
- * Versions 0.12.x and newer (verified up to 0.15.x) adopted Cobra and use POSIX-style long flags; they
+ * Versions 0.12.x and newer (verified up to 0.16.x) adopted Cobra and use POSIX-style long flags; they
  * are handled by PdfcpuV12Wrapper.
  */
 final class PdfcpuWrapperFactory
