@@ -60,10 +60,10 @@ class PdfcpuWrapperFactoryTest extends TestCase
         . "   date: 2026-08-11 20:50:54 UTC\n"
         . "     go: go1.26.5\n";
 
-    private const V16_OUTPUT = "version: 0.16.1\n"
-        . " commit: 2f7a89a0\n"
-        . "   date: 2026-10-04 14:23:58 UTC\n"
-        . "     go: go1.27.1\n";
+    private const V16_OUTPUT = "version: 0.16.2\n"
+        . " commit: b41a41d5\n"
+        . "   date: 2026-10-11 20:49:29 UTC\n"
+        . "     go: go1.27.2\n";
 
     public function testCreateReturnsV11WrapperForV011()
     {
@@ -153,7 +153,7 @@ class PdfcpuWrapperFactoryTest extends TestCase
             'v0.13.0 new format' => [self::V13_OUTPUT, 0, 13],
             'v0.14.0' => [self::V14_OUTPUT, 0, 14],
             'v0.15.0' => [self::V15_OUTPUT, 0, 15],
-            'v0.16.1 without config line' => [self::V16_OUTPUT, 0, 16],
+            'v0.16.2 without config line' => [self::V16_OUTPUT, 0, 16],
             'v0.10.0' => ["pdfcpu: v0.10.0\n", 0, 10],
             'v1.0.0' => ["pdfcpu: v1.0.0\n", 1, 0],
             'v0.12.0 no banner' => ["pdfcpu: v0.12.0 dev\ncommit: abc\n", 0, 12],
@@ -287,7 +287,7 @@ class PdfcpuWrapperFactoryTest extends TestCase
 
     public function testCreateUsesRealBinaryV16()
     {
-        $binary = '/usr/local/bin/pdfcpu_0.16.1';
+        $binary = '/usr/local/bin/pdfcpu_0.16.2';
         if (!is_executable($binary)) {
             $this->markTestSkipped(sprintf('pdfcpu v0.16 binary not found at %s', $binary));
         }
