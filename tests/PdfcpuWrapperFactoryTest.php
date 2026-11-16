@@ -301,6 +301,10 @@ class PdfcpuWrapperFactoryTest extends TestCase
      */
     public function testDetectVersionDoesNotNeedWritableConfigLocation(string $binary, int $minor)
     {
+        if (!is_executable($binary)) {
+            $this->markTestSkipped(sprintf('pdfcpu binary not found at %s', $binary));
+        }
+
         // HOME points to a regular file, so pdfcpu cannot create its default config directory below it.
         $unwritableHome = __DIR__ . '/Fixtures/example.pdf';
 
