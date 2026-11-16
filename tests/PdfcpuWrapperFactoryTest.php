@@ -180,7 +180,7 @@ class PdfcpuWrapperFactoryTest extends TestCase
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
                            ->method('createProcess')
-                           ->with(sprintf("'%s' version", $binary))
+                           ->with(sprintf("'%s' version -c disable", $binary))
                            ->willReturn($mockProcess);
 
         try {
@@ -296,6 +296,51 @@ class PdfcpuWrapperFactoryTest extends TestCase
         $this->assertInstanceOf(PdfcpuV12Wrapper::class, $wrapper);
     }
 
+    /**
+     * @dataProvider provideRealBinaries
+     */
+    public function testDetectVersionDoesNotNeedWritableConfigLocation(string $binary, int $minor)
+    {
+        // HOME points to a regular file, so pdfcpu cannot create its default config directory below it.
+        $unwritableHome = __DIR__ . '/Fixtures/example.pdf';
+
+        $processFactory = new class ($unwritableHome) extends ProcessFactory {
+            private $home;
+
+            public function __construct(string $home)
+            {
+                $this->home = $home;
+            }
+
+            public function createProcess(string $commandLine, int $timeout = self::PROCESS_DEFAULT_TIMEOUT): Process
+            {
+                // Shell builtins only: "env -u" is not available everywhere (e.g. BusyBox).
+                $envPrefix = sprintf(
+                    'unset PDFCPU_CONFIG_ROOT XDG_CONFIG_HOME; HOME=%s ',
+                    escapeshellarg($this->home)
+                );
+
+                return parent::createProcess($envPrefix . $commandLine, $timeout);
+            }
+        };
+
+        $version = PdfcpuWrapperFactory::detectVersion($binary, $processFactory);
+
+        $this->assertSame(['major' => 0, 'minor' => $minor], $version);
+    }
+
+    public function provideRealBinaries(): array
+    {
+        return [
+            'v0.11.1' => ['/usr/local/bin/pdfcpu_0.11.1', 11],
+            'v0.12.1' => ['/usr/local/bin/pdfcpu_0.12.1', 12],
+            'v0.13.0' => ['/usr/local/bin/pdfcpu_0.13.0', 13],
+            'v0.14.0' => ['/usr/local/bin/pdfcpu_0.14.0', 14],
+            'v0.15.0' => ['/usr/local/bin/pdfcpu_0.15.0', 15],
+            'v0.16.4' => ['/usr/local/bin/pdfcpu_0.16.4', 16],
+        ];
+    }
+
     private function mockProcessFactory(string $binary, string $output): ProcessFactory
     {
         $mockProcess = $this->createMock(Process::class);
@@ -308,7 +353,7 @@ class PdfcpuWrapperFactoryTest extends TestCase
         $mockProcessFactory = $this->createMock(ProcessFactory::class);
         $mockProcessFactory->expects($this->once())
                            ->method('createProcess')
-                           ->with(sprintf("'%s' version", $binary))
+                           ->with(sprintf("'%s' version -c disable", $binary))
                            ->willReturn($mockProcess);
 
         return $mockProcessFactory;

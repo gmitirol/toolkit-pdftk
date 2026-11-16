@@ -67,7 +67,10 @@ final class PdfcpuWrapperFactory
     ): array {
         $resolvedProcessFactory = $processFactory ?: new ProcessFactory();
 
-        $cmd = sprintf('%s version', escapeshellarg($binary));
+        // Disable the configuration: by default pdfcpu up to v0.15 creates it below $HOME/.config/pdfcpu even
+        // for "version", and aborts if that is not writable (e.g. on a read-only root filesystem). The
+        // version detection does not need it, and "-c disable" is understood by every supported version.
+        $cmd = sprintf('%s version -c disable', escapeshellarg($binary));
 
         /**
          * @var Process
